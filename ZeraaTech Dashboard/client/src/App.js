@@ -3,22 +3,19 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import Farms from "./pages/Farms";
+import Settings from "./pages/Settings";
 
 function App() {
-  const user = localStorage.getItem("user");
-
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        {/**
-         * Let the Dashboard handle auth redirects.
-         * This ensures Google OAuth (cookie session) can populate localStorage
-         * on first load, instead of being blocked here.
-         */}
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/farms" element={<Farms />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </Router>
   );

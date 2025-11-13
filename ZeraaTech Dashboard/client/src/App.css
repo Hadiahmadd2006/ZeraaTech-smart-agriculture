@@ -7,6 +7,15 @@
   --shadow:0 10px 30px rgba(18,25,38,.08);
 }
 
+:root.theme-dark {
+  --bg:#000000;
+  --panel:#000000;
+  --line:#ffffff;
+  --text:#ffffff;
+  --accent:#22c55e;
+  --shadow:none;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -26,8 +35,8 @@ body {
 
 .sidebar {
   padding: 18px;
-  background: #eef2ff;
-  border-right: 1px solid #e6e9f5;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
 }
@@ -46,6 +55,23 @@ body {
 
 .logout-btn:hover {
   background: #c62828;
+}
+
+.lang-btn {
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 0 20px 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 14px;
+}
+
+.lang-btn:hover {
+  background: #388e3c;
 }
 
 .brand {
@@ -74,7 +100,7 @@ body {
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
-  color: #374151;
+  color: var(--text);
 }
 
 .user-avatar {
@@ -95,14 +121,14 @@ body {
 .menu a {
   padding: 10px 12px;
   border-radius: 10px;
-  color: #374151;
+  color: var(--text);
   text-decoration: none;
   cursor: pointer;
 }
 
 .menu a.active {
-  background: #dbeafe;
-  color: #1e3a8a;
+  background: #111827;
+  color: #22c55e;
 }
 
 .main {
@@ -120,7 +146,7 @@ body {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 10px 12px;
-  background: white;
+  background: var(--panel);
 }
 
 .btn {
@@ -178,7 +204,8 @@ body {
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 6px 8px;
-  background: #fff;
+  background: var(--panel);
+  color: var(--text);
 }
 
 .recs {
@@ -192,7 +219,7 @@ body {
   border: 1px solid var(--line);
   border-radius: 14px;
   overflow: hidden;
-  background: #fff;
+  background: var(--panel);
 }
 
 .rec img {
@@ -266,4 +293,3 @@ body {
 .red {
   background: #ef4444;
 }
-

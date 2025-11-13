@@ -1,6 +1,5 @@
-import { fallbackGauges, fallbackRecs } from "./data";
+import { fallbackGauges, fallbackRecs, fallbackCrops } from "./data";
 
-// Fetches gauge data; falls back to local static data if backend is offline.
 export async function fetchGauges() {
   try {
     const res = await fetch("http://localhost:4000/api/gauges");
@@ -12,7 +11,6 @@ export async function fetchGauges() {
   }
 }
 
-// Fetches crop recommendations; falls back to static data if backend fails.
 export async function fetchRecs() {
   try {
     const res = await fetch("http://localhost:4000/api/recommendations");
@@ -24,7 +22,6 @@ export async function fetchRecs() {
   }
 }
 
-// Optional: Fetches sensor data from the backend (if Arduino integration added)
 export async function fetchSensors() {
   try {
     const res = await fetch("http://localhost:4000/api/sensors");
@@ -36,3 +33,39 @@ export async function fetchSensors() {
   }
 }
 
+export async function fetchCrops() {
+  try {
+    const res = await fetch("http://localhost:4000/api/crops");
+    if (!res.ok) throw new Error("No response from API");
+    return await res.json();
+  } catch (err) {
+    console.warn("Could not fetch crops, using fallback crops:", err.message);
+    return fallbackCrops;
+  }
+}
+
+export async function fetchSettings() {
+  try {
+    const res = await fetch("http://localhost:4000/api/settings");
+    if (!res.ok) throw new Error("No response from API");
+    return await res.json();
+  } catch (err) {
+    console.warn("Could not fetch settings:", err.message);
+    return [];
+  }
+}
+
+export async function updateSetting(key, value) {
+  try {
+    const res = await fetch(`http://localhost:4000/api/settings/${encodeURIComponent(key)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value }),
+    });
+    if (!res.ok) throw new Error("No response from API");
+    return await res.json();
+  } catch (err) {
+    console.warn("Could not update setting:", err.message);
+    throw err;
+  }
+}
