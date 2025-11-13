@@ -1,0 +1,74 @@
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(to bottom right, #e8f5e9, #c8e6c9);
+  font-family: "Poppins", sans-serif;
+}
+
+.auth-box {
+  background-color: white;
+  padding: 40px 50px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 350px;
+}
+
+h1 {
+  color: #2e7d32;
+}
+
+.google-btn,
+.guest-btn {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.google-btn {
+  background-color: #4285f4;
+}
+
+.guest-btn {
+  background-color: #66bb6a;
+}
+
+.or-text {
+  margin: 10px 0;
+  color: #777;
+}
+
+.signup-text a {
+  color: #2e7d32;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+input {
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  outline: none;
+  font-size: 14px;
+}
+
+input:focus {
+  border-color: #2e7d32;
+}
+.auth-box {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
