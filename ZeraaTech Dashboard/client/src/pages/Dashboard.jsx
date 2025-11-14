@@ -169,7 +169,7 @@ export default function Dashboard() {
           <div className="card">
             <div className="card-head">
               <div className="card-title">
-                {lang === "ar" ? "مهام اليوم" : "Today&apos;s Tasks"}
+                {lang === "ar" ? "مهام اليوم" : "Today's Tasks"}
               </div>
             </div>
             <ul className="list">
