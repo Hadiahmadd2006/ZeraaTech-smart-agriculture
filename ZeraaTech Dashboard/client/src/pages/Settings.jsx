@@ -48,15 +48,6 @@ const DEFAULT_SETTINGS = [
     max: 90,
     defaultValue: 60,
   },
-  {
-    id: "dashboard-focus",
-    group: "Dashboard",
-    label: "Primary dashboard gauge",
-    description: "The first metric you want to see when you open the app.",
-    type: "select",
-    options: ["Health", "Water", "Soil"],
-    defaultValue: "Health",
-  },
 ];
 
 function loadStoredSettings() {
