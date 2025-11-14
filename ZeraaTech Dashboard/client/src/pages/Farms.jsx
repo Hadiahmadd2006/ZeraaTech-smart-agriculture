@@ -35,13 +35,6 @@ export default function Farms() {
   const location = useLocation();
 
   useEffect(() => {
-    const local = localStorage.getItem("user");
-    if (local) {
-      setUser({ email: local });
-      load();
-      return;
-    }
-
     fetch("http://localhost:4000/auth/current-user", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => {

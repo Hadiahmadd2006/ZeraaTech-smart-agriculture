@@ -5,10 +5,31 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    alert(`Signup successful for ${email}`);
-    window.location.href = "/Login";
+    if (!email || !password) {
+      alert("Please fill in both fields.");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:4000/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.message || "Signup failed");
+        return;
+      }
+
+      alert(`Signup successful for ${email}. You can now log in.`);
+      window.location.href = "/login";
+    } catch (err) {
+      alert("Could not contact server.");
+    }
   };
 
   return (

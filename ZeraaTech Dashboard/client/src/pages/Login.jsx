@@ -5,17 +5,32 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleGoogleLogin = () => {
-    window.open("http://localhost:4000/auth/google", "_self");
-  };
-
-  const handleEmailLogin = (e) => {
+  const handleEmailLogin = async (e) => {
     e.preventDefault();
-    if (email && password) {
-      localStorage.setItem("user", email);
-      window.location.href = "/dashboard";
-    } else {
+    if (!email || !password) {
       alert("Please fill in both fields.");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:4000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.message || "Login failed");
+        return;
+      }
+
+      const data = await res.json();
+      localStorage.setItem("user", data.email);
+      window.location.href = "/dashboard";
+    } catch (err) {
+      alert("Could not contact server.");
     }
   };
 
@@ -49,10 +64,10 @@ export default function Login() {
         <p className="or-text">or</p>
 
         <button
-        className="google-btn"
-        onClick={() => {
+          className="google-btn"
+          onClick={() => {
             window.location.href = "http://localhost:4000/auth/google";
-        }}
+          }}
         >
         <img
             src="https://developers.google.com/identity/images/g-logo.png"
