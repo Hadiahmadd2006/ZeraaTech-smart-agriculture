@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { applyTheme } from "../theme";
 
+const ADMIN_EMAIL = "ghareeb.hadi1@gmail.com";
+const extractEmail = (u) =>
+  u?.email || u?.emails?.[0]?.value || u?._json?.email || "";
+
 const DEFAULT_SETTINGS = [
   {
     id: "language",
@@ -70,6 +74,7 @@ export default function Settings() {
   const [user, setUser] = useState(null);
   const [lang, setLang] = useState(localStorage.getItem("lang") || "en");
   const location = useLocation();
+  const adminEmail = ADMIN_EMAIL.toLowerCase();
 
   useEffect(() => {
     const local = localStorage.getItem("user");
@@ -83,7 +88,8 @@ export default function Settings() {
       .then((data) => {
         if (data && (data.email || data.displayName)) {
           setUser(data);
-          localStorage.setItem("user", data.email || data.displayName);
+          const email = extractEmail(data);
+          localStorage.setItem("user", email || data.displayName);
         } else {
           window.location.href = "/login";
         }
@@ -121,6 +127,9 @@ export default function Settings() {
       // ignore
     }
   };
+
+  const userEmail = (extractEmail(user) || localStorage.getItem("user") || "").toLowerCase();
+  const isAdmin = userEmail === adminEmail;
 
   const handleChange = (id, value) => {
     setSettings((prev) => {
@@ -259,16 +268,21 @@ export default function Settings() {
           </span>
         </div>
 
-        <nav className="menu">
+                <nav className="menu">
           <Link to="/dashboard" className={location.pathname === "/dashboard" ? "active" : ""}>
-            {lang === "ar" ? "الصفحة الرئيسية" : "Dashboard"}
+            {lang === "ar" ? "Dashboard" : "Dashboard"}
           </Link>
           <Link to="/farms" className={location.pathname === "/farms" ? "active" : ""}>
-            {lang === "ar" ? "المحاصيل" : "Crops"}
+            {lang === "ar" ? "Crops" : "Crops"}
           </Link>
           <Link to="/settings" className={location.pathname === "/settings" ? "active" : ""}>
-            {lang === "ar" ? "الإعدادات" : "Settings"}
+            {lang === "ar" ? "Settings" : "Settings"}
           </Link>
+          {isAdmin && (
+            <Link to="/admin" className={location.pathname === "/admin" ? "active" : ""}>
+              Admin
+            </Link>
+          )}
         </nav>
 
         <div className="sidebar-bottom">
@@ -345,3 +359,5 @@ export default function Settings() {
     </div>
   );
 }
+
+

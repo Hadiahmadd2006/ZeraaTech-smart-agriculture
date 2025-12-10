@@ -28,6 +28,10 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [lang, setLang] = useState(localStorage.getItem("lang") || "en");
   const location = useLocation();
+  const ADMIN_EMAIL = "ghareeb.hadi1@gmail.com";
+
+  const extractEmail = (u) =>
+    u?.email || u?.emails?.[0]?.value || u?._json?.email || "";
 
   useEffect(() => {
     fetch("http://localhost:4000/auth/current-user", { credentials: "include" })
@@ -35,7 +39,8 @@ export default function Dashboard() {
       .then((data) => {
         if (data && (data.email || data.displayName)) {
           setUser(data);
-          localStorage.setItem("user", data.email || data.displayName);
+          const email = extractEmail(data);
+          localStorage.setItem("user", email || data.displayName);
           load();
         } else {
           window.location.href = "/login";
@@ -73,6 +78,9 @@ export default function Dashboard() {
     localStorage.setItem("lang", next);
   };
 
+  const userEmail = (extractEmail(user) || localStorage.getItem("user") || "").toLowerCase();
+  const isAdmin = userEmail === ADMIN_EMAIL.toLowerCase();
+
   return (
     <div className="wrap">
       <aside className="sidebar">
@@ -85,14 +93,19 @@ export default function Dashboard() {
 
         <nav className="menu">
           <Link to="/dashboard" className={location.pathname === "/dashboard" ? "active" : ""}>
-            {lang === "ar" ? "الصفحة الرئيسية" : "Dashboard"}
+            {lang === "ar" ? "???? ??????" : "Dashboard"}
           </Link>
           <Link to="/farms" className={location.pathname === "/farms" ? "active" : ""}>
-            {lang === "ar" ? "المحاصيل" : "Crops"}
+            {lang === "ar" ? "????????" : "Crops"}
           </Link>
           <Link to="/settings" className={location.pathname === "/settings" ? "active" : ""}>
-            {lang === "ar" ? "الإعدادات" : "Settings"}
+            {lang === "ar" ? "?????????" : "Settings"}
           </Link>
+          {isAdmin && (
+            <Link to="/admin" className={location.pathname === "/admin" ? "active" : ""}>
+              Admin
+            </Link>
+          )}
         </nav>
 
         <div className="sidebar-bottom">
@@ -188,3 +201,6 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
+
