@@ -1,3 +1,7 @@
+# ZeraaTech Smart Agriculture
+
+- Implementation Phase report: `ZeraaTech Project Report – Implementation Phase.md`
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

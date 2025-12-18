@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Auth.css";
+import { syncDocumentLanguage } from "../i18n";
 
 export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [lang] = useState(localStorage.getItem("lang") || "en");
+
+  useEffect(() => {
+    syncDocumentLanguage(lang);
+  }, [lang]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -16,12 +22,19 @@ export default function Signup() {
       const res = await fetch("http://localhost:4000/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        alert(data.message || "Signup failed");
+        const contentType = res.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          const data = await res.json().catch(() => ({}));
+          alert(data.message || `Signup failed (${res.status})`);
+        } else {
+          const text = await res.text().catch(() => "");
+          alert(text ? `Signup failed (${res.status}): ${text}` : `Signup failed (${res.status})`);
+        }
         return;
       }
 
@@ -33,7 +46,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-container" dir={lang === "ar" ? "rtl" : "ltr"}>
       <div className="auth-box">
         <h1>ZeraaTech</h1>
         <p>Create your account</p>

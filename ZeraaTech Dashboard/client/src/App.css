@@ -30,15 +30,31 @@ body {
 .wrap {
   display: grid;
   grid-template-columns: 240px 1fr;
+  grid-template-areas: "sidebar main";
   min-height: 100vh;
 }
 
+.wrap[dir="rtl"] {
+  grid-template-columns: 1fr 240px;
+  grid-template-areas: "main sidebar";
+}
+
 .sidebar {
+  grid-area: sidebar;
   padding: 18px;
   background: var(--panel);
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
+}
+
+[dir="rtl"] .sidebar {
+  border-right: 0;
+  border-left: 1px solid var(--line);
+}
+
+.main {
+  grid-area: main;
 }
 
 .logout-btn {
@@ -88,7 +104,7 @@ body {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  margin-right: 8px;
+  margin-inline-end: 8px;
 }
 
 .sidebar-bottom {
@@ -124,6 +140,10 @@ body {
   color: var(--text);
   text-decoration: none;
   cursor: pointer;
+}
+
+[dir="rtl"] .menu a {
+  text-align: right;
 }
 
 .menu a.active {
@@ -163,6 +183,11 @@ body {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
+}
+
+[dir="rtl"] .cards,
+[dir="rtl"] .recs {
+  direction: rtl;
 }
 
 .card {
@@ -318,7 +343,7 @@ body {
 .table td {
   padding: 10px 8px;
   border-bottom: 1px solid var(--line);
-  text-align: left;
+  text-align: start;
 }
 
 .table th {

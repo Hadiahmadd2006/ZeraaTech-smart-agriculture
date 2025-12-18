@@ -50,12 +50,43 @@ router.get("/", async (_req, res) => {
   }
 });
 
+router.get("/:id", async (req, res) => {
+  try {
+    const crop = await Farm.findById(req.params.id);
+    if (!crop) return res.status(404).json({ message: "Crop not found" });
+    res.json(crop);
+  } catch (err) {
+    res.status(400).json({ message: "Failed to load crop", error: err.message });
+  }
+});
+
 router.post("/", async (req, res) => {
   try {
     const crop = await Farm.create(req.body);
     res.status(201).json(crop);
   } catch (err) {
     res.status(400).json({ message: "Failed to create crop", error: err.message });
+  }
+});
+
+router.put("/:id", async (req, res) => {
+  try {
+    const updated = await Farm.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ message: "Crop not found" });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ message: "Failed to update crop", error: err.message });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const existing = await Farm.findById(req.params.id);
+    if (!existing) return res.status(404).json({ message: "Crop not found" });
+    await Farm.deleteOne({ _id: existing._id });
+    res.status(204).end();
+  } catch (err) {
+    res.status(400).json({ message: "Failed to delete crop", error: err.message });
   }
 });
 

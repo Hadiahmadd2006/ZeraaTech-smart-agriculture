@@ -1,5 +1,5 @@
 const COLORS = { good: "#22c55e", water: "#0ea5e9", spray: "#ef4444", shade: "#f59e0b" };
-const ICONS = { good: "✓", water: "💧", spray: "⚠", shade: "☀" };
+const ICONS = { good: "✓", water: "💧", spray: "🧪", shade: "☂" };
 
 const PLANT_NAMES = {
   Tomato: { en: "Tomato", ar: "طماطم" },
@@ -37,3 +37,4 @@ export default function RecommendationTile({ img, plant, status, hint, lang = "e
     </div>
   );
 }
+

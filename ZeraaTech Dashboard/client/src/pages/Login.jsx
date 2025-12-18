@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Auth.css";
+import { syncDocumentLanguage } from "../i18n";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [lang] = useState(localStorage.getItem("lang") || "en");
+
+  useEffect(() => {
+    syncDocumentLanguage(lang);
+  }, [lang]);
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
@@ -35,7 +41,7 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-container" dir={lang === "ar" ? "rtl" : "ltr"}>
       <div className="auth-box">
         <h1>ZeraaTech</h1>
         <p>Login to your account</p>
@@ -69,16 +75,16 @@ export default function Login() {
             window.location.href = "http://localhost:4000/auth/google";
           }}
         >
-        <img
+          <img
             src="https://developers.google.com/identity/images/g-logo.png"
             alt="Google"
             style={{ width: "20px", marginRight: "10px" }}
-        />
-        Sign in with Google
+          />
+          Sign in with Google
         </button>
 
         <p className="signup-text">
-          Don’t have an account? <a href="/signup">Sign up</a>
+          Don't have an account? <a href="/signup">Sign up</a>
         </p>
       </div>
     </div>

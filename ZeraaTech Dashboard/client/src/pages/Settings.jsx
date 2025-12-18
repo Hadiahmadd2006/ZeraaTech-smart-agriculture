@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { applyTheme } from "../theme";
+import { syncDocumentLanguage } from "../i18n";
 
 const ADMIN_EMAIL = "ghareeb.hadi1@gmail.com";
-const extractEmail = (u) =>
-  u?.email || u?.emails?.[0]?.value || u?._json?.email || "";
+const extractEmail = (u) => u?.email || u?.emails?.[0]?.value || u?._json?.email || "";
 
 const DEFAULT_SETTINGS = [
   {
@@ -67,14 +67,17 @@ export default function Settings() {
     const stored = loadStoredSettings();
     return DEFAULT_SETTINGS.map((setting) => ({
       ...setting,
-      value:
-        stored[setting.id] !== undefined ? stored[setting.id] : setting.defaultValue,
+      value: stored[setting.id] !== undefined ? stored[setting.id] : setting.defaultValue,
     }));
   });
   const [user, setUser] = useState(null);
   const [lang, setLang] = useState(localStorage.getItem("lang") || "en");
   const location = useLocation();
   const adminEmail = ADMIN_EMAIL.toLowerCase();
+
+  useEffect(() => {
+    syncDocumentLanguage(lang);
+  }, [lang]);
 
   useEffect(() => {
     const local = localStorage.getItem("user");
@@ -99,7 +102,6 @@ export default function Settings() {
       });
   }, []);
 
-  // Keep lang and theme in sync with saved settings on first load.
   useEffect(() => {
     const stored = loadStoredSettings();
     if (stored.language === "Arabic") {
@@ -133,9 +135,7 @@ export default function Settings() {
 
   const handleChange = (id, value) => {
     setSettings((prev) => {
-      const updated = prev.map((setting) =>
-        setting.id === id ? { ...setting, value } : setting
-      );
+      const updated = prev.map((setting) => (setting.id === id ? { ...setting, value } : setting));
       persistSettings(updated);
       return updated;
     });
@@ -259,7 +259,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="wrap">
+    <div className="wrap" dir={lang === "ar" ? "rtl" : "ltr"}>
       <aside className="sidebar">
         <div className="brand">
           <div className="logo" />
@@ -268,19 +268,19 @@ export default function Settings() {
           </span>
         </div>
 
-                <nav className="menu">
+        <nav className="menu">
           <Link to="/dashboard" className={location.pathname === "/dashboard" ? "active" : ""}>
-            {lang === "ar" ? "Dashboard" : "Dashboard"}
+            {lang === "ar" ? "لوحة التحكم" : "Dashboard"}
           </Link>
           <Link to="/farms" className={location.pathname === "/farms" ? "active" : ""}>
-            {lang === "ar" ? "Crops" : "Crops"}
+            {lang === "ar" ? "المحاصيل" : "Crops"}
           </Link>
           <Link to="/settings" className={location.pathname === "/settings" ? "active" : ""}>
-            {lang === "ar" ? "Settings" : "Settings"}
+            {lang === "ar" ? "الإعدادات" : "Settings"}
           </Link>
           {isAdmin && (
             <Link to="/admin" className={location.pathname === "/admin" ? "active" : ""}>
-              Admin
+              {lang === "ar" ? "الإدارة" : "Admin"}
             </Link>
           )}
         </nav>
@@ -325,7 +325,7 @@ export default function Settings() {
         <div className="top">
           <h2>{lang === "ar" ? "الإعدادات" : "Settings"}</h2>
           <button className="btn" onClick={handleReset}>
-            {lang === "ar" ? "العودة للوضع الافتراضي" : "Reset to defaults"}
+            {lang === "ar" ? "إعادة الضبط للوضع الافتراضي" : "Reset to defaults"}
           </button>
         </div>
 
@@ -359,5 +359,3 @@ export default function Settings() {
     </div>
   );
 }
-
-

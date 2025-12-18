@@ -10,6 +10,12 @@ import recommendations from "./routes/recommendations.js";
 import authRoutes from "./routes/auth.js";
 import cropsRoutes from "./routes/crops.js";
 import settingsRoutes from "./routes/settings.js";
+import farmsRoutes from "./routes/farms.js";
+import sensorsRoutes from "./routes/sensors.js";
+import adminUsersRoutes from "./routes/adminUsers.js";
+import thresholdsRoutes from "./routes/thresholds.js";
+import alertsRoutes from "./routes/alerts.js";
+import systemLogsRoutes from "./routes/systemLogs.js";
 
 dotenv.config();
 
@@ -48,6 +54,12 @@ app.use("/api/gauges", gauges);
 app.use("/api/recommendations", recommendations);
 app.use("/api/crops", cropsRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/farms", farmsRoutes);
+app.use("/api/sensors", sensorsRoutes);
+app.use("/api/admin/users", adminUsersRoutes);
+app.use("/api/thresholds", thresholdsRoutes);
+app.use("/api/alerts", alertsRoutes);
+app.use("/api/system-logs", systemLogsRoutes);
 app.use("/auth", authRoutes);
 
 app.listen(4000, () => console.log("Server running at http://localhost:4000"));

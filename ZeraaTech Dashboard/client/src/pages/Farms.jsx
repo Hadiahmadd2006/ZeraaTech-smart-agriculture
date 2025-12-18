@@ -1,25 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { fetchCrops } from "../api";
+import { syncDocumentLanguage } from "../i18n";
+
+const API_BASE = "http://localhost:4000";
 
 const STATUS_TEXT = {
-  en: {
-    good: "Good",
-    dry: "Needs water",
-    wet: "Too wet",
-  },
-  ar: {
-    good: "جيد",
-    dry: "يحتاج ماء",
-    wet: "رطب جدًا",
-  },
+  en: { good: "Good", dry: "Needs water", wet: "Too wet" },
+  ar: { good: "جيد", dry: "يحتاج ماء", wet: "رطب جدًا" },
 };
 
-const STATUS_COLOR = {
-  good: "#22c55e",
-  dry: "#ef4444",
-  wet: "#0ea5e9",
-};
+const STATUS_COLOR = { good: "#22c55e", dry: "#ef4444", wet: "#0ea5e9" };
 
 const CROP_NAMES = {
   Tomato: { en: "Tomato", ar: "طماطم" },
@@ -29,18 +19,30 @@ const CROP_NAMES = {
 };
 
 const ADMIN_EMAIL = "ghareeb.hadi1@gmail.com";
-const extractEmail = (u) =>
-  u?.email || u?.emails?.[0]?.value || u?._json?.email || "";
+const extractEmail = (u) => u?.email || u?.emails?.[0]?.value || u?._json?.email || "";
 
 export default function Farms() {
   const [crops, setCrops] = useState([]);
   const [user, setUser] = useState(null);
   const [lang, setLang] = useState(localStorage.getItem("lang") || "en");
+  const [showAdd, setShowAdd] = useState(false);
+  const [newFarm, setNewFarm] = useState({
+    name: "",
+    location: "",
+    crop: "Tomato",
+    areaHectares: 1,
+    moisture: 60,
+    pumpStatus: "Auto",
+  });
   const location = useLocation();
   const adminEmail = ADMIN_EMAIL.toLowerCase();
 
   useEffect(() => {
-    fetch("http://localhost:4000/auth/current-user", { credentials: "include" })
+    syncDocumentLanguage(lang);
+  }, [lang]);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/auth/current-user`, { credentials: "include" })
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => {
         if (data && (data.email || data.displayName)) {
@@ -55,11 +57,20 @@ export default function Farms() {
       .catch(() => {
         window.location.href = "/login";
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const load = async () => {
-    const data = await fetchCrops();
-    setCrops(data);
+    try {
+      const res = await fetch(`${API_BASE}/api/farms`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load farms");
+      const data = await res.json();
+      setCrops(data);
+    } catch (_) {
+      const res = await fetch(`${API_BASE}/api/crops`, { credentials: "include" });
+      const data = await res.json().catch(() => []);
+      setCrops(data);
+    }
   };
 
   const toggleLang = () => {
@@ -73,7 +84,7 @@ export default function Farms() {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:4000/auth/logout", {
+      await fetch(`${API_BASE}/auth/logout`, {
         method: "GET",
         credentials: "include",
         headers: { Accept: "application/json" },
@@ -85,8 +96,67 @@ export default function Farms() {
     }
   };
 
+  const handleCreateFarm = async (e) => {
+    e.preventDefault();
+    if (!newFarm.name.trim() || !newFarm.location.trim()) return;
+
+    const payload = {
+      ...newFarm,
+      areaHectares: Number(newFarm.areaHectares),
+      moisture: Number(newFarm.moisture),
+      status: "Active",
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/api/farms`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.message || "Failed to create farm");
+        return;
+      }
+
+      setNewFarm({
+        name: "",
+        location: "",
+        crop: "Tomato",
+        areaHectares: 1,
+        moisture: 60,
+        pumpStatus: "Auto",
+      });
+      setShowAdd(false);
+      load();
+    } catch (_) {
+      alert("Could not contact server.");
+    }
+  };
+
+  const handleDeleteFarm = async (id) => {
+    if (!id) return;
+    if (!window.confirm(lang === "ar" ? "حذف هذه المزرعة؟" : "Delete this farm?")) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/farms/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok && res.status !== 204) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.message || "Failed to delete farm");
+        return;
+      }
+      load();
+    } catch (_) {
+      alert("Could not contact server.");
+    }
+  };
+
   return (
-    <div className="wrap">
+    <div className="wrap" dir={lang === "ar" ? "rtl" : "ltr"}>
       <aside className="sidebar">
         <div className="brand">
           <div className="logo" />
@@ -95,19 +165,19 @@ export default function Farms() {
           </span>
         </div>
 
-                <nav className="menu">
+        <nav className="menu">
           <Link to="/dashboard" className={location.pathname === "/dashboard" ? "active" : ""}>
-            {lang === "ar" ? "Dashboard" : "Dashboard"}
+            {lang === "ar" ? "لوحة التحكم" : "Dashboard"}
           </Link>
           <Link to="/farms" className={location.pathname === "/farms" ? "active" : ""}>
-            {lang === "ar" ? "Crops" : "Crops"}
+            {lang === "ar" ? "المحاصيل" : "Crops"}
           </Link>
           <Link to="/settings" className={location.pathname === "/settings" ? "active" : ""}>
-            {lang === "ar" ? "Settings" : "Settings"}
+            {lang === "ar" ? "الإعدادات" : "Settings"}
           </Link>
           {isAdmin && (
             <Link to="/admin" className={location.pathname === "/admin" ? "active" : ""}>
-              Admin
+              {lang === "ar" ? "الإدارة" : "Admin"}
             </Link>
           )}
         </nav>
@@ -139,10 +209,91 @@ export default function Farms() {
       <main className="main">
         <div className="top">
           <h2>{lang === "ar" ? "حالة المحاصيل" : "Crop status"}</h2>
-          <button className="btn" onClick={load}>
-            {lang === "ar" ? "تحديث" : "Refresh"}
-          </button>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button className="btn" onClick={load}>
+              {lang === "ar" ? "تحديث" : "Refresh"}
+            </button>
+            <button className="btn" onClick={() => setShowAdd((v) => !v)}>
+              {lang === "ar" ? "إضافة مزرعة" : "Add farm"}
+            </button>
+          </div>
         </div>
+
+        {showAdd && (
+          <section className="card" style={{ marginTop: 14 }}>
+            <div className="card-head">
+              <div className="card-title">{lang === "ar" ? "مزرعة جديدة" : "New farm"}</div>
+            </div>
+            <div className="card-body">
+              <form className="inline-form" onSubmit={handleCreateFarm}>
+                <div style={{ flex: 2 }}>
+                  <label className="muted">{lang === "ar" ? "الاسم" : "Name"}</label>
+                  <input
+                    value={newFarm.name}
+                    onChange={(e) => setNewFarm((p) => ({ ...p, name: e.target.value }))}
+                    placeholder={lang === "ar" ? "اسم المزرعة" : "Farm name"}
+                  />
+                </div>
+                <div style={{ flex: 2 }}>
+                  <label className="muted">{lang === "ar" ? "الموقع" : "Location"}</label>
+                  <input
+                    value={newFarm.location}
+                    onChange={(e) => setNewFarm((p) => ({ ...p, location: e.target.value }))}
+                    placeholder={lang === "ar" ? "الموقع" : "Location"}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="muted">{lang === "ar" ? "المحصول" : "Crop"}</label>
+                  <select
+                    value={newFarm.crop}
+                    onChange={(e) => setNewFarm((p) => ({ ...p, crop: e.target.value }))}
+                  >
+                    <option value="Tomato">Tomato</option>
+                    <option value="Potato">Potato</option>
+                    <option value="Pepper">Pepper</option>
+                    <option value="Wheat">Wheat</option>
+                  </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="muted">{lang === "ar" ? "المساحة (هكتار)" : "Area (ha)"}</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    value={newFarm.areaHectares}
+                    onChange={(e) => setNewFarm((p) => ({ ...p, areaHectares: e.target.value }))}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="muted">{lang === "ar" ? "رطوبة التربة %" : "Soil moisture %"}</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={newFarm.moisture}
+                    onChange={(e) => setNewFarm((p) => ({ ...p, moisture: e.target.value }))}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="muted">{lang === "ar" ? "المضخة" : "Pump"}</label>
+                  <select
+                    value={newFarm.pumpStatus}
+                    onChange={(e) => setNewFarm((p) => ({ ...p, pumpStatus: e.target.value }))}
+                  >
+                    <option value="Auto">Auto</option>
+                    <option value="Manual">Manual</option>
+                    <option value="Scheduled">Scheduled</option>
+                  </select>
+                </div>
+                <div style={{ alignSelf: "flex-end" }}>
+                  <button className="btn" type="submit">
+                    {lang === "ar" ? "حفظ" : "Save"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+        )}
 
         <section className="cards">
           {crops.map((crop) => {
@@ -162,7 +313,14 @@ export default function Farms() {
               <div className="card" key={key}>
                 <div className="card-head">
                   <div className="card-title">{cropName}</div>
-                  <span>{crop.location}</span>
+                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                    <span>{crop.location}</span>
+                    {crop._id ? (
+                      <button className="action-btn ghost" onClick={() => handleDeleteFarm(crop._id)}>
+                        {lang === "ar" ? "حذف" : "Delete"}
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
                 <div className="card-body">
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -179,7 +337,7 @@ export default function Farms() {
                   </div>
                   <div style={{ marginTop: 8, fontSize: 13, color: "#6b7280" }}>
                     {lang === "ar"
-                      ? "إذا كانت العلامة حمراء، اسقِ هذا المحصول الآن."
+                      ? "إذا كانت النقطة حمراء، اسقِ هذا المحصول الآن."
                       : "If the dot is red, water this crop now."}
                   </div>
                 </div>
@@ -191,7 +349,3 @@ export default function Farms() {
     </div>
   );
 }
-
-
-
-

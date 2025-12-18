@@ -3,24 +3,20 @@ import DonutGauge from "../components/DonutGauge";
 import RecommendationTile from "../components/RecommendationTile";
 import { fetchGauges, fetchRecs } from "../api";
 import { Link, useLocation } from "react-router-dom";
+import { syncDocumentLanguage } from "../i18n";
 
 const GAUGE_LABELS = {
   en: { health: "Health", water: "Water", soil: "Soil" },
-  ar: { health: "الصحة", water: "الماء", soil: "التربة" },
+  ar: { health: "الصحة", water: "المياه", soil: "التربة" },
 };
 
 const TASKS = {
-  en: [
-    "Open pump (tomato) - 10m",
-    "Shade peppers at noon",
-    "Spray potato (late blight)",
-  ],
-  ar: [
-    "افتح المضخة (طماطم) - 10 دقائق",
-    "ظلل الفلفل وقت الظهر",
-    "رش البطاطس (لفحة متأخرة)",
-  ],
+  en: ["Open pump (tomato) - 10m", "Shade peppers at noon", "Spray potato (late blight)"],
+  ar: ["تشغيل المضخة (طماطم) - 10 دقائق", "تظليل الفلفل عند الظهر", "رش البطاطس (اللفحة المتأخرة)"],
 };
+
+const ADMIN_EMAIL = "ghareeb.hadi1@gmail.com";
+const extractEmail = (u) => u?.email || u?.emails?.[0]?.value || u?._json?.email || "";
 
 export default function Dashboard() {
   const [gauges, setGauges] = useState([]);
@@ -28,10 +24,10 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [lang, setLang] = useState(localStorage.getItem("lang") || "en");
   const location = useLocation();
-  const ADMIN_EMAIL = "ghareeb.hadi1@gmail.com";
 
-  const extractEmail = (u) =>
-    u?.email || u?.emails?.[0]?.value || u?._json?.email || "";
+  useEffect(() => {
+    syncDocumentLanguage(lang);
+  }, [lang]);
 
   useEffect(() => {
     fetch("http://localhost:4000/auth/current-user", { credentials: "include" })
@@ -49,6 +45,7 @@ export default function Dashboard() {
       .catch(() => {
         window.location.href = "/login";
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const load = async () => {
@@ -82,7 +79,7 @@ export default function Dashboard() {
   const isAdmin = userEmail === ADMIN_EMAIL.toLowerCase();
 
   return (
-    <div className="wrap">
+    <div className="wrap" dir={lang === "ar" ? "rtl" : "ltr"}>
       <aside className="sidebar">
         <div className="brand">
           <div className="logo" />
@@ -93,17 +90,17 @@ export default function Dashboard() {
 
         <nav className="menu">
           <Link to="/dashboard" className={location.pathname === "/dashboard" ? "active" : ""}>
-            {lang === "ar" ? "???? ??????" : "Dashboard"}
+            {lang === "ar" ? "لوحة التحكم" : "Dashboard"}
           </Link>
           <Link to="/farms" className={location.pathname === "/farms" ? "active" : ""}>
-            {lang === "ar" ? "????????" : "Crops"}
+            {lang === "ar" ? "المحاصيل" : "Crops"}
           </Link>
           <Link to="/settings" className={location.pathname === "/settings" ? "active" : ""}>
-            {lang === "ar" ? "?????????" : "Settings"}
+            {lang === "ar" ? "الإعدادات" : "Settings"}
           </Link>
           {isAdmin && (
             <Link to="/admin" className={location.pathname === "/admin" ? "active" : ""}>
-              Admin
+              {lang === "ar" ? "الإدارة" : "Admin"}
             </Link>
           )}
         </nav>
@@ -136,7 +133,7 @@ export default function Dashboard() {
         <div className="top">
           <input
             className="search"
-            placeholder={lang === "ar" ? "ابحث عن المحاصيل والتنبيهات" : "Search farms and alerts"}
+            placeholder={lang === "ar" ? "ابحث في المزارع والتنبيهات" : "Search farms and alerts"}
           />
           <button className="btn" onClick={load}>
             {lang === "ar" ? "تحديث" : "Refresh"}
@@ -168,9 +165,7 @@ export default function Dashboard() {
 
           <div className="card wide">
             <div className="card-head">
-              <div className="card-title">
-                {lang === "ar" ? "التوصيات" : "Recommendations"}
-              </div>
+              <div className="card-title">{lang === "ar" ? "التوصيات" : "Recommendations"}</div>
             </div>
             <div className="recs">
               {recs.map((r) => (
@@ -181,9 +176,7 @@ export default function Dashboard() {
 
           <div className="card">
             <div className="card-head">
-              <div className="card-title">
-                {lang === "ar" ? "مهام اليوم" : "Today's Tasks"}
-              </div>
+              <div className="card-title">{lang === "ar" ? "مهام اليوم" : "Today's Tasks"}</div>
             </div>
             <ul className="list">
               {TASKS[lang].map((text, index) => {
@@ -201,6 +194,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-
-

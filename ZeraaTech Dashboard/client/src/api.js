@@ -2,7 +2,7 @@ import { fallbackGauges, fallbackRecs, fallbackCrops } from "./data";
 
 export async function fetchGauges() {
   try {
-    const res = await fetch("http://localhost:4000/api/gauges");
+    const res = await fetch("http://localhost:4000/api/gauges", { credentials: "include" });
     if (!res.ok) throw new Error("No response from API");
     return await res.json();
   } catch (err) {
@@ -13,7 +13,7 @@ export async function fetchGauges() {
 
 export async function fetchRecs() {
   try {
-    const res = await fetch("http://localhost:4000/api/recommendations");
+    const res = await fetch("http://localhost:4000/api/recommendations", { credentials: "include" });
     if (!res.ok) throw new Error("No response from API");
     return await res.json();
   } catch (err) {
@@ -24,7 +24,7 @@ export async function fetchRecs() {
 
 export async function fetchSensors() {
   try {
-    const res = await fetch("http://localhost:4000/api/sensors");
+    const res = await fetch("http://localhost:4000/api/sensors", { credentials: "include" });
     if (!res.ok) throw new Error("No response from API");
     return await res.json();
   } catch (err) {
@@ -35,7 +35,7 @@ export async function fetchSensors() {
 
 export async function fetchCrops() {
   try {
-    const res = await fetch("http://localhost:4000/api/crops");
+    const res = await fetch("http://localhost:4000/api/crops", { credentials: "include" });
     if (!res.ok) throw new Error("No response from API");
     return await res.json();
   } catch (err) {
@@ -46,7 +46,7 @@ export async function fetchCrops() {
 
 export async function fetchSettings() {
   try {
-    const res = await fetch("http://localhost:4000/api/settings");
+    const res = await fetch("http://localhost:4000/api/settings", { credentials: "include" });
     if (!res.ok) throw new Error("No response from API");
     return await res.json();
   } catch (err) {
@@ -60,6 +60,7 @@ export async function updateSetting(key, value) {
     const res = await fetch(`http://localhost:4000/api/settings/${encodeURIComponent(key)}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ value }),
     });
     if (!res.ok) throw new Error("No response from API");
