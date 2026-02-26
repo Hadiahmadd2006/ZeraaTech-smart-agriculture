@@ -1,0 +1,11 @@
+# Global ignores for this repository
+**/node_modules/
+**/build/
+
+# OS / local artifacts
+.DS_Store
+
+# Local generated reports
+FULL_FOLDER_STRUCTURE.txt
+IMPORTANT_FILES_STRUCTURE.txt
+NOT_IGNORED_FILES.txt
