@@ -1,11 +1,53 @@
-# Global ignores for this repository
-**/node_modules/
-**/build/
+# =========================
+# ZeraaTech Smart Agriculture
+# Repository-wide .gitignore
+# =========================
 
-# OS / local artifacts
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
 
-# Local generated reports
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node / package managers
+**/node_modules/
+**/.pnp
+**/.pnp.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build / test outputs
+**/build/
+**/dist/
+**/coverage/
+**/.nyc_output/
+**/.cache/
+
+# Runtime files
+*.pid
+*.pid.lock
+*.seed
+*.out
+
+# Environment files (keep examples tracked if you add them)
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+
+# Local generated reports/lists
 FULL_FOLDER_STRUCTURE.txt
 IMPORTANT_FILES_STRUCTURE.txt
 NOT_IGNORED_FILES.txt
