@@ -69,11 +69,14 @@ router.post("/login", async (req, res) => {
 
     const adminEmail = (process.env.ADMIN_EMAIL || DEFAULT_ADMIN_EMAIL).toLowerCase();
     user.role = normalizedEmail === adminEmail ? "admin" : "farmer";
-    req.session.userId = user._id.toString();
     user.lastActiveAt = new Date();
     await user.save();
 
-    return res.json({ id: user._id, email: user.email, role: user.role });
+    return req.login({ appUserId: user._id.toString(), email: user.email }, (err) => {
+      if (err) return res.status(500).json({ message: "Login session failed", error: err.message });
+      req.session.userId = user._id.toString();
+      return res.json({ id: user._id, email: user.email, role: user.role });
+    });
   } catch (err) {
     return res.status(500).json({ message: "Login failed", error: err.message });
   }
@@ -91,10 +94,14 @@ router.get("/logout", (req, res) => {
     };
 
     if (req.session) {
-      req.session.destroy(() => finish());
+      req.session.destroy(() => {
+        res.clearCookie("connect.sid");
+        finish();
+      });
       return;
     }
 
+    res.clearCookie("connect.sid");
     finish();
   });
 });

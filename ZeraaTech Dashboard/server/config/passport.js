@@ -10,12 +10,12 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:4000/auth/google/callback",
     },
     async (_accessToken, _refreshToken, profile, done) => {
       try {
         const email = profile?.emails?.[0]?.value || profile?._json?.email || "";
-        if (!email) return done(null, profile);
+        if (!email) return done(null, false);
 
         const defaultAdminEmail = "ghareeb.hadi1@gmail.com";
         const adminEmail = (process.env.ADMIN_EMAIL || defaultAdminEmail).toLowerCase();
@@ -39,9 +39,10 @@ passport.use(
           { upsert: true, new: true }
         );
 
-        profile.appUserId = appUser._id.toString();
-        profile.role = appUser.role;
-        return done(null, profile);
+        return done(null, {
+          appUserId: appUser._id.toString(),
+          email: appUser.email,
+        });
       } catch (err) {
         return done(err);
       }
@@ -49,7 +50,18 @@ passport.use(
   )
 );
 
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((user, done) => done(null, user));
+passport.serializeUser((user, done) => {
+  done(null, user?.appUserId || null);
+});
+
+passport.deserializeUser(async (appUserId, done) => {
+  try {
+    if (!appUserId) return done(null, false);
+    const appUser = await User.findById(appUserId);
+    return done(null, appUser || false);
+  } catch (err) {
+    return done(err);
+  }
+});
 
 export default passport;
