@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const COLORS = { good: "#22c55e", water: "#0ea5e9", spray: "#ef4444", shade: "#f59e0b" };
 const ICONS = { good: "✓", water: "💧", spray: "🧪", shade: "☂" };
 
@@ -14,7 +16,7 @@ const HINTS = {
   noon: { en: "noon", ar: "الظهر" },
 };
 
-export default function RecommendationTile({ img, plant, status, hint, lang = "en" }) {
+export default function RecommendationTile({ img, plant, status, hint, lang = "en", to }) {
   const color = COLORS[status] || "#9ca3af";
   const icon = ICONS[status] || "•";
 
@@ -24,7 +26,7 @@ export default function RecommendationTile({ img, plant, status, hint, lang = "e
   const hintMap = hint ? HINTS[hint] : null;
   const hintText = hintMap ? hintMap[lang] || hintMap.en : hint;
 
-  return (
+  const content = (
     <div className="rec">
       <img src={img} alt={name} />
       <div className="rec-bar">
@@ -36,5 +38,11 @@ export default function RecommendationTile({ img, plant, status, hint, lang = "e
       </div>
     </div>
   );
-}
 
+  if (!to) return content;
+  return (
+    <Link to={to} className="rec-link" aria-label={`${name} details`}>
+      {content}
+    </Link>
+  );
+}

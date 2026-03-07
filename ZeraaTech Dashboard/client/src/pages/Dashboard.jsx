@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import DonutGauge from "../components/DonutGauge";
 import RecommendationTile from "../components/RecommendationTile";
-import { fetchGauges, fetchRecs } from "../api";
+import { fetchAIInsights, fetchGauges, fetchRecs } from "../api";
 import { Link, useLocation } from "react-router-dom";
 import { syncDocumentLanguage } from "../i18n";
 
@@ -15,12 +15,38 @@ const TASKS = {
   ar: ["تشغيل المضخة (طماطم) - 10 دقائق", "تظليل الفلفل عند الظهر", "رش البطاطس (اللفحة المتأخرة)"],
 };
 
+const AI_TEXT = {
+  en: {
+    irrigationRecommendations: "Irrigation Recommendations",
+    diseaseRiskScoring: "Disease Risk Scoring",
+    smartAlertPrioritization: "Smart Alert Prioritization",
+    riskScore: "Risk score",
+    action: "Action",
+    confidence: "Priority score",
+    target: "Target",
+  },
+  ar: {
+    irrigationRecommendations: "توصيات الري",
+    diseaseRiskScoring: "تقييم مخاطر الأمراض",
+    smartAlertPrioritization: "ترتيب التنبيهات الذكي",
+    riskScore: "درجة الخطر",
+    action: "الإجراء",
+    confidence: "درجة الأولوية",
+    target: "الهدف",
+  },
+};
+
 const ADMIN_EMAIL = "ghareeb.hadi1@gmail.com";
 const extractEmail = (u) => u?.email || u?.emails?.[0]?.value || u?._json?.email || "";
 
 export default function Dashboard() {
   const [gauges, setGauges] = useState([]);
   const [recs, setRecs] = useState([]);
+  const [aiInsights, setAiInsights] = useState({
+    irrigationRecommendations: [],
+    diseaseRiskScores: [],
+    prioritizedAlerts: [],
+  });
   const [user, setUser] = useState(null);
   const [lang, setLang] = useState(localStorage.getItem("lang") || "en");
   const location = useLocation();
@@ -49,10 +75,14 @@ export default function Dashboard() {
   }, []);
 
   const load = async () => {
-    const g = await fetchGauges();
-    const r = await fetchRecs();
+    const [g, r, ai] = await Promise.all([fetchGauges(), fetchRecs(), fetchAIInsights()]);
     setGauges(g);
     setRecs(r);
+    setAiInsights({
+      irrigationRecommendations: ai?.irrigationRecommendations || [],
+      diseaseRiskScores: ai?.diseaseRiskScores || [],
+      prioritizedAlerts: ai?.prioritizedAlerts || [],
+    });
   };
 
   const handleLogout = async () => {
@@ -77,6 +107,14 @@ export default function Dashboard() {
 
   const userEmail = (extractEmail(user) || localStorage.getItem("user") || "").toLowerCase();
   const isAdmin = userEmail === ADMIN_EMAIL.toLowerCase();
+  const t = (key) => AI_TEXT[lang]?.[key] || AI_TEXT.en[key] || key;
+
+  const tagClassByLevel = (level) => {
+    const value = String(level || "").toLowerCase();
+    if (value === "high") return "tag tag-red";
+    if (value === "medium") return "tag tag-amber";
+    return "tag tag-green";
+  };
 
   return (
     <div className="wrap" dir={lang === "ar" ? "rtl" : "ltr"}>
@@ -169,7 +207,12 @@ export default function Dashboard() {
             </div>
             <div className="recs">
               {recs.map((r) => (
-                <RecommendationTile key={r.id} {...r} lang={lang} />
+                <RecommendationTile
+                  key={r.id}
+                  {...r}
+                  lang={lang}
+                  to={`/crop/${encodeURIComponent(String(r.plant || "").toLowerCase())}`}
+                />
               ))}
             </div>
           </div>
@@ -188,6 +231,88 @@ export default function Dashboard() {
                 );
               })}
             </ul>
+          </div>
+
+          <div className="card">
+            <div className="card-head">
+              <div className="card-title">{t("irrigationRecommendations")}</div>
+            </div>
+            <div className="card-body">
+              <div style={{ display: "grid", gap: 10 }}>
+                {aiInsights.irrigationRecommendations.slice(0, 3).map((item) => (
+                  <div key={item.id} style={{ border: "1px dashed var(--line)", borderRadius: 10, padding: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                      <div style={{ fontWeight: 700 }}>{item.farm}</div>
+                      <span className={tagClassByLevel(item.priority)}>{item.priority}</span>
+                    </div>
+                    <div className="muted" style={{ marginTop: 4 }}>
+                      {item.crop} • {item.moistureNow}% / {t("target")} {item.targetMoisture}%
+                    </div>
+                    <div style={{ marginTop: 6, fontSize: 13 }}>
+                      {item.recommendedDurationMin > 0
+                        ? `${lang === "ar" ? "تشغيل الري" : "Irrigate"}: ${item.recommendedDurationMin}m`
+                        : lang === "ar"
+                        ? "لا حاجة لري فوري"
+                        : "No immediate irrigation needed"}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="card-head">
+              <div className="card-title">{t("diseaseRiskScoring")}</div>
+            </div>
+            <div className="card-body">
+              <div style={{ display: "grid", gap: 10 }}>
+                {aiInsights.diseaseRiskScores.slice(0, 3).map((risk) => (
+                  <div key={risk.id} style={{ border: "1px dashed var(--line)", borderRadius: 10, padding: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                      <div style={{ fontWeight: 700 }}>
+                        {risk.crop} - {risk.disease}
+                      </div>
+                      <span className={tagClassByLevel(risk.level)}>{risk.level}</span>
+                    </div>
+                    <div className="muted" style={{ marginTop: 4 }}>
+                      {risk.farm}
+                    </div>
+                    <div style={{ marginTop: 6, fontSize: 13 }}>
+                      {t("riskScore")}: {risk.score}%
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="card wide">
+            <div className="card-head">
+              <div className="card-title">{t("smartAlertPrioritization")}</div>
+            </div>
+            <div className="card-body">
+              <div style={{ display: "grid", gap: 10 }}>
+                {aiInsights.prioritizedAlerts.slice(0, 4).map((alert) => (
+                  <div key={alert.id} style={{ border: "1px solid var(--line)", borderRadius: 10, padding: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
+                      <div style={{ fontWeight: 700 }}>{alert.title}</div>
+                      <span className={tagClassByLevel(alert.severity)}>{alert.severity}</span>
+                    </div>
+                    <div className="muted" style={{ marginTop: 4 }}>
+                      {alert.farm}
+                    </div>
+                    <div style={{ marginTop: 6, fontSize: 13 }}>{alert.reason}</div>
+                    <div style={{ marginTop: 6, fontSize: 13 }}>
+                      <strong>{t("action")}:</strong> {alert.suggestedAction}
+                    </div>
+                    <div className="muted" style={{ marginTop: 4 }}>
+                      {t("confidence")}: {alert.score}/100
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
       </main>

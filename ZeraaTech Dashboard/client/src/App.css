@@ -247,6 +247,21 @@ body {
   background: var(--panel);
 }
 
+.rec-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.rec-link .rec {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rec-link:hover .rec {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.12);
+}
+
 .rec img {
   width: 100%;
   height: 110px;

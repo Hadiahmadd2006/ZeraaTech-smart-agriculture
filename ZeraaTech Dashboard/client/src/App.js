@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Farms from "./pages/Farms";
 import Settings from "./pages/Settings";
 import Admin from "./pages/Admin";
+import CropInsights from "./pages/CropInsights";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/farms" element={<Farms />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/crop/:cropName" element={<CropInsights />} />
       </Routes>
     </Router>
   );

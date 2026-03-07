@@ -16,6 +16,7 @@ import adminUsersRoutes from "./routes/adminUsers.js";
 import thresholdsRoutes from "./routes/thresholds.js";
 import alertsRoutes from "./routes/alerts.js";
 import systemLogsRoutes from "./routes/systemLogs.js";
+import aiInsightsRoutes from "./routes/aiInsights.js";
 
 dotenv.config();
 
@@ -65,6 +66,7 @@ app.use("/api/admin/users", adminUsersRoutes);
 app.use("/api/thresholds", thresholdsRoutes);
 app.use("/api/alerts", alertsRoutes);
 app.use("/api/system-logs", systemLogsRoutes);
+app.use("/api/ai-insights", aiInsightsRoutes);
 app.use("/auth", authRoutes);
 
 app.listen(4000, () => console.log("Server running at http://localhost:4000"));
