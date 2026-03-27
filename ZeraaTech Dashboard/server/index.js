@@ -17,6 +17,7 @@ import thresholdsRoutes from "./routes/thresholds.js";
 import alertsRoutes from "./routes/alerts.js";
 import systemLogsRoutes from "./routes/systemLogs.js";
 import aiInsightsRoutes from "./routes/aiInsights.js";
+import diseaseDetectRoutes from "./routes/diseaseDetect.js";
 
 dotenv.config();
 
@@ -67,6 +68,7 @@ app.use("/api/thresholds", thresholdsRoutes);
 app.use("/api/alerts", alertsRoutes);
 app.use("/api/system-logs", systemLogsRoutes);
 app.use("/api/ai-insights", aiInsightsRoutes);
+app.use("/api/disease-detect", diseaseDetectRoutes);
 app.use("/auth", authRoutes);
 
 app.listen(4000, () => console.log("Server running at http://localhost:4000"));
