@@ -1,0 +1,154 @@
+{
+  "Apple___Apple_scab": {
+    "en": "Apply fungicide spray. Remove infected leaves. Improve air circulation around plants.",
+    "ar": "رش مبيد فطري. إزالة الأوراق المصابة. تحسين دوران الهواء حول النباتات."
+  },
+  "Apple___Black_rot": {
+    "en": "Remove and destroy infected fruit. Apply copper-based fungicide. Prune to improve airflow.",
+    "ar": "إزالة وتدمير الثمار المصابة. رش مبيد فطري نحاسي. تقليم لتحسين تدفق الهواء."
+  },
+  "Apple___Cedar_apple_rust": {
+    "en": "Remove infected leaves. Apply fungicide. Avoid wetting foliage.",
+    "ar": "إزالة الأوراق المصابة. رش مبيد فطري. تجنب تبليل الأوراق."
+  },
+  "Apple___healthy": {
+    "en": "No treatment needed. Plant appears healthy. Continue regular care and monitoring.",
+    "ar": "لا يلزم علاج. النبات يبدو بصحة جيدة. استمر في الرعاية والمراقبة المنتظمة."
+  },
+  "Blueberry___healthy": {
+    "en": "No treatment needed. Plant appears healthy. Continue regular care and monitoring.",
+    "ar": "لا يلزم علاج. النبات يبدو بصحة جيدة. استمر في الرعاية والمراقبة المنتظمة."
+  },
+  "Cherry___healthy": {
+    "en": "No treatment needed. Plant appears healthy. Continue regular care and monitoring.",
+    "ar": "لا يلزم علاج. النبات يبدو بصحة جيدة. استمر في الرعاية والمراقبة المنتظمة."
+  },
+  "Cherry___Powdery_mildew": {
+    "en": "Improve ventilation. Reduce humidity. Apply sulfur-based fungicide.",
+    "ar": "تحسين التهوية. تقليل الرطوبة. رش مبيد فطري أساسه الكبريت."
+  },
+  "Corn___Cercospora_leaf_spot Gray_leaf_spot": {
+    "en": "Consult a local agricultural expert. Remove severely affected parts. Monitor spread closely.",
+    "ar": "استشر خبيراً زراعياً محلياً. إزالة الأجزاء المتضررة بشدة. مراقبة الانتشار عن كثب."
+  },
+  "Corn___Common_rust": {
+    "en": "Remove infected leaves. Apply fungicide. Avoid wetting foliage.",
+    "ar": "إزالة الأوراق المصابة. رش مبيد فطري. تجنب تبليل الأوراق."
+  },
+  "Corn___healthy": {
+    "en": "No treatment needed. Plant appears healthy. Continue regular care and monitoring.",
+    "ar": "لا يلزم علاج. النبات يبدو بصحة جيدة. استمر في الرعاية والمراقبة المنتظمة."
+  },
+  "Corn___Northern_Leaf_Blight": {
+    "en": "Apply fungicide immediately. Remove severely affected plants. Avoid overhead watering.",
+    "ar": "رش مبيد فطري فوراً. إزالة النباتات المتضررة بشدة. تجنب الري العلوي."
+  },
+  "Grape___Black_rot": {
+    "en": "Remove and destroy infected fruit. Apply copper-based fungicide. Prune to improve airflow.",
+    "ar": "إزالة وتدمير الثمار المصابة. رش مبيد فطري نحاسي. تقليم لتحسين تدفق الهواء."
+  },
+  "Grape___Esca_(Black_Measles)": {
+    "en": "Consult a local agricultural expert. Remove severely affected parts. Monitor spread closely.",
+    "ar": "استشر خبيراً زراعياً محلياً. إزالة الأجزاء المتضررة بشدة. مراقبة الانتشار عن كثب."
+  },
+  "Grape___healthy": {
+    "en": "No treatment needed. Plant appears healthy. Continue regular care and monitoring.",
+    "ar": "لا يلزم علاج. النبات يبدو بصحة جيدة. استمر في الرعاية والمراقبة المنتظمة."
+  },
+  "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)": {
+    "en": "Apply fungicide immediately. Remove severely affected plants. Avoid overhead watering.",
+    "ar": "رش مبيد فطري فوراً. إزالة النباتات المتضررة بشدة. تجنب الري العلوي."
+  },
+  "Orange___Haunglongbing_(Citrus_greening)": {
+    "en": "Consult a local agricultural expert. Remove severely affected parts. Monitor spread closely.",
+    "ar": "استشر خبيراً زراعياً محلياً. إزالة الأجزاء المتضررة بشدة. مراقبة الانتشار عن كثب."
+  },
+  "Peach___Bacterial_spot": {
+    "en": "Remove infected parts. Apply copper-based bactericide. Avoid working with wet plants.",
+    "ar": "إزالة الأجزاء المصابة. رش مبيد بكتيري نحاسي. تجنب العمل مع النباتات المبللة."
+  },
+  "Peach___healthy": {
+    "en": "No treatment needed. Plant appears healthy. Continue regular care and monitoring.",
+    "ar": "لا يلزم علاج. النبات يبدو بصحة جيدة. استمر في الرعاية والمراقبة المنتظمة."
+  },
+  "Pepper,_bell___Bacterial_spot": {
+    "en": "Remove infected parts. Apply copper-based bactericide. Avoid working with wet plants.",
+    "ar": "إزالة الأجزاء المصابة. رش مبيد بكتيري نحاسي. تجنب العمل مع النباتات المبللة."
+  },
+  "Pepper,_bell___healthy": {
+    "en": "No treatment needed. Plant appears healthy. Continue regular care and monitoring.",
+    "ar": "لا يلزم علاج. النبات يبدو بصحة جيدة. استمر في الرعاية والمراقبة المنتظمة."
+  },
+  "Potato___Early_blight": {
+    "en": "Apply fungicide immediately. Remove severely affected plants. Avoid overhead watering.",
+    "ar": "رش مبيد فطري فوراً. إزالة النباتات المتضررة بشدة. تجنب الري العلوي."
+  },
+  "Potato___healthy": {
+    "en": "No treatment needed. Plant appears healthy. Continue regular care and monitoring.",
+    "ar": "لا يلزم علاج. النبات يبدو بصحة جيدة. استمر في الرعاية والمراقبة المنتظمة."
+  },
+  "Potato___Late_blight": {
+    "en": "Apply fungicide immediately. Remove severely affected plants. Avoid overhead watering.",
+    "ar": "رش مبيد فطري فوراً. إزالة النباتات المتضررة بشدة. تجنب الري العلوي."
+  },
+  "Raspberry___healthy": {
+    "en": "No treatment needed. Plant appears healthy. Continue regular care and monitoring.",
+    "ar": "لا يلزم علاج. النبات يبدو بصحة جيدة. استمر في الرعاية والمراقبة المنتظمة."
+  },
+  "Soybean___healthy": {
+    "en": "No treatment needed. Plant appears healthy. Continue regular care and monitoring.",
+    "ar": "لا يلزم علاج. النبات يبدو بصحة جيدة. استمر في الرعاية والمراقبة المنتظمة."
+  },
+  "Squash___Powdery_mildew": {
+    "en": "Improve ventilation. Reduce humidity. Apply sulfur-based fungicide.",
+    "ar": "تحسين التهوية. تقليل الرطوبة. رش مبيد فطري أساسه الكبريت."
+  },
+  "Strawberry___healthy": {
+    "en": "No treatment needed. Plant appears healthy. Continue regular care and monitoring.",
+    "ar": "لا يلزم علاج. النبات يبدو بصحة جيدة. استمر في الرعاية والمراقبة المنتظمة."
+  },
+  "Strawberry___Leaf_scorch": {
+    "en": "Consult a local agricultural expert. Remove severely affected parts. Monitor spread closely.",
+    "ar": "استشر خبيراً زراعياً محلياً. إزالة الأجزاء المتضررة بشدة. مراقبة الانتشار عن كثب."
+  },
+  "Tomato___Bacterial_spot": {
+    "en": "Remove infected parts. Apply copper-based bactericide. Avoid working with wet plants.",
+    "ar": "إزالة الأجزاء المصابة. رش مبيد بكتيري نحاسي. تجنب العمل مع النباتات المبللة."
+  },
+  "Tomato___Early_blight": {
+    "en": "Apply fungicide immediately. Remove severely affected plants. Avoid overhead watering.",
+    "ar": "رش مبيد فطري فوراً. إزالة النباتات المتضررة بشدة. تجنب الري العلوي."
+  },
+  "Tomato___healthy": {
+    "en": "No treatment needed. Plant appears healthy. Continue regular care and monitoring.",
+    "ar": "لا يلزم علاج. النبات يبدو بصحة جيدة. استمر في الرعاية والمراقبة المنتظمة."
+  },
+  "Tomato___Late_blight": {
+    "en": "Apply fungicide immediately. Remove severely affected plants. Avoid overhead watering.",
+    "ar": "رش مبيد فطري فوراً. إزالة النباتات المتضررة بشدة. تجنب الري العلوي."
+  },
+  "Tomato___Leaf_Mold": {
+    "en": "Improve ventilation. Reduce humidity. Apply sulfur-based fungicide.",
+    "ar": "تحسين التهوية. تقليل الرطوبة. رش مبيد فطري أساسه الكبريت."
+  },
+  "Tomato___Septoria_leaf_spot": {
+    "en": "Consult a local agricultural expert. Remove severely affected parts. Monitor spread closely.",
+    "ar": "استشر خبيراً زراعياً محلياً. إزالة الأجزاء المتضررة بشدة. مراقبة الانتشار عن كثب."
+  },
+  "Tomato___Spider_mites Two-spotted_spider_mite": {
+    "en": "Consult a local agricultural expert. Remove severely affected parts. Monitor spread closely.",
+    "ar": "استشر خبيراً زراعياً محلياً. إزالة الأجزاء المتضررة بشدة. مراقبة الانتشار عن كثب."
+  },
+  "Tomato___Target_Spot": {
+    "en": "Consult a local agricultural expert. Remove severely affected parts. Monitor spread closely.",
+    "ar": "استشر خبيراً زراعياً محلياً. إزالة الأجزاء المتضررة بشدة. مراقبة الانتشار عن كثب."
+  },
+  "Tomato___Tomato_mosaic_virus": {
+    "en": "Remove infected plants to prevent spread. Control insect vectors. No chemical cure for viral infections.",
+    "ar": "إزالة النباتات المصابة لمنع الانتشار. مكافحة الحشرات الناقلة. لا يوجد علاج كيميائي للعدوى الفيروسية."
+  },
+  "Tomato___Tomato_Yellow_Leaf_Curl_Virus": {
+    "en": "Remove infected plants to prevent spread. Control insect vectors. No chemical cure for viral infections.",
+    "ar": "إزالة النباتات المصابة لمنع الانتشار. مكافحة الحشرات الناقلة. لا يوجد علاج كيميائي للعدوى الفيروسية."
+  }
+}
