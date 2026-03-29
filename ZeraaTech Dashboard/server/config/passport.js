@@ -22,18 +22,21 @@ passport.use(
         const normalizedEmail = email.toLowerCase();
         const role = normalizedEmail === adminEmail ? "admin" : "farmer";
 
+        const photoUrl = profile.photos?.[0]?.value || null;
+
         const appUser = await User.findOneAndUpdate(
           { email: normalizedEmail },
           {
             $setOnInsert: {
               email: normalizedEmail,
               status: "Active",
-              displayName: profile.displayName || email,
               googleId: profile.id,
             },
             $set: {
               lastActiveAt: new Date(),
               role,
+              displayName: profile.displayName || email,
+              photo: photoUrl,
             },
           },
           { upsert: true, new: true }

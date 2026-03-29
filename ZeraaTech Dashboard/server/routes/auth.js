@@ -123,6 +123,7 @@ router.get("/current-user", (req, res) => {
       id: req.appUser._id,
       email: req.appUser.email,
       displayName: req.appUser.displayName || req.appUser.email,
+      photo: req.appUser.photo || null,
       role: req.appUser.role,
       status: req.appUser.status,
       language: req.appUser.language,

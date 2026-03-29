@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema(
     passwordHash: { type: String },
     googleId: { type: String },
     displayName: { type: String },
+    photo: { type: String },
     role: {
       type: String,
       enum: ["farmer", "admin"],
