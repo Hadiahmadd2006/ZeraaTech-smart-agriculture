@@ -91,7 +91,7 @@ def detect_disease():
         preds = model.predict(img_array)
         idx   = int(preds[0].argmax())
         conf  = float(preds[0][idx])
-        label = class_names[idx] if class_names else f"class_{idx}"
+        label = class_names[str(idx)] if class_names else f"class_{idx}"
 
         treatment = treatments.get(label, {})
         return jsonify({
