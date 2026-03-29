@@ -2,6 +2,7 @@ import { Router } from "express";
 import SensorReading from "../models/SensorReading.js";
 import Farm from "../models/Farm.js";
 import { attachAppUser, requireAuth } from "../middleware/auth.js";
+import { checkThresholdsAndCreateAlerts } from "../services/alertEngine.js";
 
 const router = Router();
 
@@ -47,6 +48,9 @@ router.post("/", async (req, res) => {
     if (!ok) return res.status(403).json({ message: "Forbidden" });
 
     const reading = await SensorReading.create(req.body);
+    checkThresholdsAndCreateAlerts(reading).catch((err) =>
+      console.error("[AlertEngine] Error:", err.message)
+    );
     res.status(201).json(reading);
   } catch (err) {
     res.status(400).json({ message: "Failed to create sensor reading", error: err.message });

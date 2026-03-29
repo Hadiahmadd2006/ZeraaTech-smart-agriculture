@@ -86,5 +86,24 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.patch("/:id/acknowledge", async (req, res) => {
+  try {
+    const alert = await Alert.findById(req.params.id);
+    if (!alert) return res.status(404).json({ message: "Alert not found" });
+
+    const ok = await canAccessFarm(req.appUser, alert.farm);
+    if (!ok) return res.status(403).json({ message: "Forbidden" });
+
+    alert.status = "Acknowledged";
+    alert.acknowledgedAt = new Date();
+    alert.acknowledgedBy = req.appUser._id;
+
+    await alert.save();
+    res.json(alert);
+  } catch (err) {
+    res.status(400).json({ message: "Failed to acknowledge alert", error: err.message });
+  }
+});
+
 export default router;
 
