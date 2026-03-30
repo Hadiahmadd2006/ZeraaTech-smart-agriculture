@@ -64,7 +64,8 @@ export default function Signup() {
     <div className="auth-container signup-bg" dir={lang === "ar" ? "rtl" : "ltr"}>
       <div className="auth-box">
 
-        <h1>Join ZeraaTech 🌱</h1>
+        <h1 style={{ marginBottom: 4 }}>Welcome to ZeraaTech!</h1>
+        <img src="/img/zeraatech-logo.png" alt="ZeraaTech" style={{ width: "90px", marginBottom: "8px" }} />
         <p>Create your account to get started</p>
 
         {error   && <div className="auth-error">{error}</div>}

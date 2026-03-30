@@ -97,7 +97,8 @@ export default function Login() {
     <div className="auth-container login-bg" dir={lang === "ar" ? "rtl" : "ltr"}>
       <div className="auth-box">
 
-        <h1>ZeraaTech 🌿</h1>
+        <h1 style={{ marginBottom: 4 }}>Welcome to ZeraaTech!</h1>
+        <img src="/img/zeraatech-logo.png" alt="ZeraaTech" style={{ width: "90px", marginBottom: "8px" }} />
 
         {step === "credentials" ? (
           <>
