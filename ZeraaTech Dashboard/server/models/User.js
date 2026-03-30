@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema(
     googleId: { type: String },
     displayName: { type: String },
     photo: { type: String },
+    phone: { type: String, default: null },
     role: {
       type: String,
       enum: ["farmer", "admin"],
@@ -21,6 +22,8 @@ const userSchema = new mongoose.Schema(
     },
     language: { type: String, enum: ["en", "ar"], default: "en" },
     lastActiveAt: { type: Date },
+    otpCode: { type: String, default: null },
+    otpExpiresAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

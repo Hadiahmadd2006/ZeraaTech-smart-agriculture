@@ -1,74 +1,219 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* ── Shared base ─────────────────────────────────────────── */
 .auth-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background: linear-gradient(to bottom right, #e8f5e9, #c8e6c9);
+  min-height: 100vh;
   font-family: "Poppins", sans-serif;
 }
 
 .auth-box {
-  background-color: white;
-  padding: 40px 50px;
+  background: #ffffff;
+  padding: 44px 48px;
   border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   text-align: center;
-  width: 350px;
+  width: 380px;
+  animation: fadeIn 0.45s ease-out;
 }
 
-h1 {
-  color: #2e7d32;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.google-btn,
-.guest-btn {
+.auth-box h1 {
+  font-size: 1.9rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.auth-box p {
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+/* ── Input fields ────────────────────────────────────────── */
+.auth-input {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 8px 0;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #e0e0e0;
+  outline: none;
+  font-size: 14px;
+  font-family: "Poppins", sans-serif;
+  transition: border-color 0.2s;
+  background: #fafafa;
+}
+
+.auth-input:focus {
+  border-color: #2e7d32;
+  background: #fff;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.auth-btn-primary {
   width: 100%;
   padding: 12px;
-  margin: 10px 0;
+  margin: 10px 0 6px;
   border: none;
-  border-radius: 8px;
-  color: white;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.auth-btn-primary:hover  { opacity: 0.92; }
+.auth-btn-primary:active { transform: scale(0.98); }
+
+.auth-btn-google {
+  width: 100%;
+  padding: 11px;
+  margin: 6px 0;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  background: #fff;
+  color: #444;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background 0.2s;
+}
+
+.auth-btn-google:hover { background: #f5f5f5; }
+
+.auth-btn-ghost {
+  background: none;
+  border: none;
+  color: #2e7d32;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  text-decoration: underline;
+  font-family: "Poppins", sans-serif;
+  padding: 0;
 }
 
-.google-btn {
-  background-color: #4285f4;
+/* ── Divider ─────────────────────────────────────────────── */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+  color: #aaa;
+  font-size: 13px;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e8e8e8;
 }
 
-.guest-btn {
-  background-color: #66bb6a;
-}
-
-.or-text {
-  margin: 10px 0;
+/* ── Footer link ─────────────────────────────────────────── */
+.auth-footer {
+  margin-top: 18px;
+  font-size: 13px;
   color: #777;
 }
-
-.signup-text a {
+.auth-footer a {
   color: #2e7d32;
   text-decoration: none;
   font-weight: 600;
 }
 
-input {
-  width: 100%;
-  margin: 10px 0;
-  padding: 10px;
+/* ── Error / info messages ───────────────────────────────── */
+.auth-error {
+  background: #fdecea;
+  color: #c62828;
   border-radius: 8px;
-  border: 1px solid #ddd;
-  outline: none;
-  font-size: 14px;
+  padding: 9px 12px;
+  font-size: 13px;
+  margin: 8px 0;
+  text-align: left;
+}
+.auth-info {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  margin: 8px 0;
+  text-align: left;
 }
 
-input:focus {
-  border-color: #2e7d32;
+/* ── OTP digits ──────────────────────────────────────────── */
+.otp-hint {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 10px;
 }
-.auth-box {
-  animation: fadeIn 0.5s ease-in;
+.otp-hint strong { color: #2e7d32; }
+
+/* ════════════════════════════════════════════════════════════
+   LOGIN — dark forest theme
+   ════════════════════════════════════════════════════════════ */
+.auth-container.login-bg {
+  background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #388e3c 100%);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+.auth-container.login-bg .auth-box {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
 }
+
+.auth-container.login-bg .auth-box h1 { color: #1b5e20; }
+.auth-container.login-bg .auth-box p  { color: #555; }
+
+.auth-btn-primary.login-btn {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  color: #fff;
+}
+
+/* ════════════════════════════════════════════════════════════
+   SIGNUP — light fresh theme
+   ════════════════════════════════════════════════════════════ */
+.auth-container.signup-bg {
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 60%, #dcedc8 100%);
+}
+
+.auth-container.signup-bg .auth-box {
+  box-shadow: 0 12px 40px rgba(46, 125, 50, 0.15);
+  width: 420px;
+}
+
+.auth-container.signup-bg .auth-box h1 { color: #2e7d32; }
+.auth-container.signup-bg .auth-box p  { color: #666; }
+
+.auth-btn-primary.signup-btn {
+  background: linear-gradient(135deg, #43a047, #66bb6a);
+  color: #fff;
+}
+
+.input-row {
+  display: flex;
+  gap: 10px;
+}
+.input-row .auth-input { flex: 1; }
+
+.input-label {
+  text-align: left;
+  font-size: 12px;
+  color: #888;
+  margin: 10px 0 2px;
+}
+
+/* Legacy selectors kept for any shared usage */
+.google-btn { display: none; }
+.signup-text a { color: #2e7d32; text-decoration: none; font-weight: 600; }
+input:focus { border-color: #2e7d32; }
