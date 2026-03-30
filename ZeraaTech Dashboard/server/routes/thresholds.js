@@ -4,30 +4,26 @@ import { attachAppUser, requireAuth, requireAdmin } from "../middleware/auth.js"
 
 const router = Router();
 
-async function ensureSeedData() {
-  const count = await Threshold.countDocuments();
-  if (count > 0) return;
+const SEED_THRESHOLDS = [
+  { key: "soilMoistureMin",  label: "Min Soil Moisture %",  group: "Irrigation",   unit: "%",   min: 0,  max: 100, value: 40 },
+  { key: "soilMoistureMax",  label: "Max Soil Moisture %",  group: "Irrigation",   unit: "%",   min: 0,  max: 100, value: 75 },
+  { key: "temperatureMin",   label: "Min Temperature",       group: "Temperature",  unit: "°C",  min: -10, max: 60, value: 18 },
+  { key: "temperatureMax",   label: "Max Temperature",       group: "Temperature",  unit: "°C",  min: -10, max: 60, value: 35 },
+  { key: "humidityMin",      label: "Min Humidity %",        group: "Humidity",     unit: "%",   min: 0,  max: 100, value: 30 },
+  { key: "humidityMax",      label: "Max Humidity %",        group: "Humidity",     unit: "%",   min: 0,  max: 100, value: 85 },
+  { key: "phMin",            label: "Min pH",                group: "pH",           unit: "pH",  min: 0,  max: 14,  value: 5.5 },
+  { key: "phMax",            label: "Max pH",                group: "pH",           unit: "pH",  min: 0,  max: 14,  value: 7.5 },
+  { key: "lightMin",         label: "Min Light (lux)",       group: "Light",        unit: "lux", min: 0,  max: null, value: 1000 },
+  { key: "lightMax",         label: "Max Light (lux)",       group: "Light",        unit: "lux", min: 0,  max: null, value: 80000 },
+];
 
-  await Threshold.insertMany([
-    {
-      key: "soilMoistureMin",
-      label: "Min Soil Moisture %",
-      group: "Irrigation",
-      unit: "%",
-      min: 0,
-      max: 100,
-      value: 40,
-    },
-    {
-      key: "soilMoistureMax",
-      label: "Max Soil Moisture %",
-      group: "Irrigation",
-      unit: "%",
-      min: 0,
-      max: 100,
-      value: 75,
-    },
-  ]);
+async function ensureSeedData() {
+  for (const seed of SEED_THRESHOLDS) {
+    const exists = await Threshold.findOne({ key: seed.key });
+    if (!exists) {
+      await Threshold.create(seed);
+    }
+  }
 }
 
 router.use(requireAuth, attachAppUser);

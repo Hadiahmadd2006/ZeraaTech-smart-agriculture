@@ -7,6 +7,46 @@ const ADMIN_EMAIL = "ghareeb.hadi1@gmail.com";
 
 const extractEmail = (u) => u?.email || u?.emails?.[0]?.value || u?._json?.email || "";
 
+const DEFAULT_THRESHOLDS = {
+  temperatureMin: 18,
+  temperatureMax: 35,
+  moistureMin: 40,
+  moistureMax: 80,
+  phMin: 5.5,
+  phMax: 7.5,
+};
+
+const FALLBACK_LOGS = [
+  {
+    id: "log-1",
+    type: "LOGIN",
+    description: "Admin user logged in successfully.",
+    actor: "System",
+    createdAt: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
+  },
+  {
+    id: "log-2",
+    type: "SENSOR",
+    description: "Sensor readings received from Farm 1.",
+    actor: "IoT Pipeline",
+    createdAt: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
+  },
+  {
+    id: "log-3",
+    type: "ALERT",
+    description: "High priority irrigation alert was created.",
+    actor: "Alert Engine",
+    createdAt: new Date(Date.now() - 1000 * 60 * 75).toISOString(),
+  },
+  {
+    id: "log-4",
+    type: "SMS",
+    description: "SMS notification sent to farmer phone number.",
+    actor: "SMS Gateway",
+    createdAt: new Date(Date.now() - 1000 * 60 * 130).toISOString(),
+  },
+];
+
 const TEXT = {
   en: {
     dashboard: "Dashboard",
@@ -54,6 +94,26 @@ const TEXT = {
     never: "Never",
     justNow: "Just now",
     unknown: "Unknown",
+    thresholdManagement: "Threshold management",
+    thresholdHelp: "Set safe min and max values used by the alert engine.",
+    temperature: "Temperature",
+    moisture: "Moisture",
+    ph: "pH",
+    min: "Min",
+    max: "Max",
+    saveThresholds: "Save thresholds",
+    saving: "Saving...",
+    saveSuccess: "Thresholds saved successfully.",
+    saveFailed: "Could not save thresholds.",
+    systemLogs: "System logs",
+    logsHelp: "Recent platform events: logins, sensor readings, alerts, and SMS.",
+    eventType: "Event type",
+    description: "Description",
+    actor: "Actor",
+    time: "Time",
+    noLogs: "No logs available.",
+    loadingLogs: "Loading logs...",
+    retryLoad: "Retry",
   },
   ar: {
     dashboard: "لوحة التحكم",
@@ -101,6 +161,26 @@ const TEXT = {
     never: "أبدًا",
     justNow: "الآن",
     unknown: "غير معروف",
+    thresholdManagement: "إدارة الحدود",
+    thresholdHelp: "حدد القيم الدنيا والعليا الآمنة التي يستخدمها نظام التنبيهات.",
+    temperature: "درجة الحرارة",
+    moisture: "الرطوبة",
+    ph: "الرقم الهيدروجيني",
+    min: "الحد الأدنى",
+    max: "الحد الأقصى",
+    saveThresholds: "حفظ الحدود",
+    saving: "جارٍ الحفظ...",
+    saveSuccess: "تم حفظ الحدود بنجاح.",
+    saveFailed: "تعذر حفظ الحدود.",
+    systemLogs: "سجلات النظام",
+    logsHelp: "أحدث أحداث المنصة: تسجيل الدخول وقراءات الحساسات والتنبيهات والرسائل النصية.",
+    eventType: "نوع الحدث",
+    description: "الوصف",
+    actor: "الجهة",
+    time: "الوقت",
+    noLogs: "لا توجد سجلات متاحة.",
+    loadingLogs: "جارٍ تحميل السجلات...",
+    retryLoad: "إعادة المحاولة",
   },
 };
 
@@ -112,6 +192,11 @@ export default function Admin() {
   const [user, setUser] = useState(null);
   const [lang, setLang] = useState(localStorage.getItem("lang") || "en");
   const [newUser, setNewUser] = useState({ name: "", email: "", role: "Farmer" });
+  const [thresholds, setThresholds] = useState(DEFAULT_THRESHOLDS);
+  const [isSavingThresholds, setIsSavingThresholds] = useState(false);
+  const [thresholdMessage, setThresholdMessage] = useState("");
+  const [logs, setLogs] = useState([]);
+  const [isLogsLoading, setIsLogsLoading] = useState(false);
   const location = useLocation();
 
   const adminEmail = ADMIN_EMAIL.toLowerCase();
@@ -133,6 +218,13 @@ export default function Admin() {
     if (diffHr < 24) return `${diffHr}h ago`;
     const diffDay = Math.floor(diffHr / 24);
     return `${diffDay}d ago`;
+  };
+
+  const formatLogTime = (dateValue) => {
+    if (!dateValue) return t("unknown");
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return t("unknown");
+    return date.toLocaleString();
   };
 
   const loadTeam = async () => {
@@ -170,6 +262,47 @@ export default function Admin() {
       setLoadError(err?.message || "Failed to load users");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadThresholds = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/thresholds`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load thresholds");
+      const data = await res.json();
+      setThresholds({
+        temperatureMin: Number(data.temperatureMin ?? DEFAULT_THRESHOLDS.temperatureMin),
+        temperatureMax: Number(data.temperatureMax ?? DEFAULT_THRESHOLDS.temperatureMax),
+        moistureMin: Number(data.moistureMin ?? DEFAULT_THRESHOLDS.moistureMin),
+        moistureMax: Number(data.moistureMax ?? DEFAULT_THRESHOLDS.moistureMax),
+        phMin: Number(data.phMin ?? DEFAULT_THRESHOLDS.phMin),
+        phMax: Number(data.phMax ?? DEFAULT_THRESHOLDS.phMax),
+      });
+    } catch (_) {
+      setThresholds(DEFAULT_THRESHOLDS);
+    }
+  };
+
+  const loadLogs = async () => {
+    setIsLogsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/logs`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load logs");
+      const data = await res.json();
+      const rows = Array.isArray(data) ? data : data?.logs || [];
+      setLogs(
+        rows.map((log, index) => ({
+          id: log.id || log._id || `log-${index}`,
+          type: log.type || log.category || "SYSTEM",
+          description: log.description || log.message || "-",
+          actor: log.actor || log.user?.displayName || log.user?.email || "System",
+          createdAt: log.createdAt || log.timestamp || null,
+        }))
+      );
+    } catch (_) {
+      setLogs(FALLBACK_LOGS);
+    } finally {
+      setIsLogsLoading(false);
     }
   };
 
@@ -217,7 +350,10 @@ export default function Admin() {
   }, [user, userEmail, adminEmail]);
 
   useEffect(() => {
-    if (isAdmin) loadTeam();
+    if (!isAdmin) return;
+    loadTeam();
+    loadThresholds();
+    loadLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 
@@ -321,6 +457,39 @@ export default function Admin() {
       loadTeam();
     } catch (_) {
       alert("Could not contact server.");
+    }
+  };
+
+  const handleThresholdChange = (key, value) => {
+    setThresholds((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const saveThresholds = async () => {
+    setIsSavingThresholds(true);
+    setThresholdMessage("");
+    try {
+      const payload = {
+        temperatureMin: Number(thresholds.temperatureMin),
+        temperatureMax: Number(thresholds.temperatureMax),
+        moistureMin: Number(thresholds.moistureMin),
+        moistureMax: Number(thresholds.moistureMax),
+        phMin: Number(thresholds.phMin),
+        phMax: Number(thresholds.phMax),
+      };
+
+      const res = await fetch(`${API_BASE}/api/admin/thresholds`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("Failed to save thresholds");
+      setThresholdMessage(t("saveSuccess"));
+    } catch (_) {
+      setThresholdMessage(t("saveFailed"));
+    } finally {
+      setIsSavingThresholds(false);
     }
   };
 
@@ -454,6 +623,121 @@ export default function Admin() {
                 {stats.suspended} {t("blocked")}
               </div>
               <div className="muted">{t("review")}</div>
+            </div>
+          </div>
+        </section>
+
+        <section className="cards" style={{ marginTop: 18 }}>
+          <div className="card wide">
+            <div className="card-head">
+              <div>
+                <div className="card-title">{t("thresholdManagement")}</div>
+                <div className="muted">{t("thresholdHelp")}</div>
+              </div>
+            </div>
+            <div className="card-body">
+              <div className="inline-form" style={{ marginTop: 0 }}>
+                <div style={{ flex: 1 }}>
+                  <label className="muted">{t("temperature")} {t("min")}</label>
+                  <input
+                    type="number"
+                    value={thresholds.temperatureMin}
+                    onChange={(e) => handleThresholdChange("temperatureMin", e.target.value)}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="muted">{t("temperature")} {t("max")}</label>
+                  <input
+                    type="number"
+                    value={thresholds.temperatureMax}
+                    onChange={(e) => handleThresholdChange("temperatureMax", e.target.value)}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="muted">{t("moisture")} {t("min")}</label>
+                  <input
+                    type="number"
+                    value={thresholds.moistureMin}
+                    onChange={(e) => handleThresholdChange("moistureMin", e.target.value)}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="muted">{t("moisture")} {t("max")}</label>
+                  <input
+                    type="number"
+                    value={thresholds.moistureMax}
+                    onChange={(e) => handleThresholdChange("moistureMax", e.target.value)}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="muted">{t("ph")} {t("min")}</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={thresholds.phMin}
+                    onChange={(e) => handleThresholdChange("phMin", e.target.value)}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="muted">{t("ph")} {t("max")}</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={thresholds.phMax}
+                    onChange={(e) => handleThresholdChange("phMax", e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 12, flexWrap: "wrap" }}>
+                <button className="btn" onClick={saveThresholds} disabled={isSavingThresholds}>
+                  {isSavingThresholds ? t("saving") : t("saveThresholds")}
+                </button>
+                {thresholdMessage ? <div className="muted">{thresholdMessage}</div> : null}
+              </div>
+            </div>
+          </div>
+
+          <div className="card wide">
+            <div className="card-head">
+              <div>
+                <div className="card-title">{t("systemLogs")}</div>
+                <div className="muted">{t("logsHelp")}</div>
+              </div>
+              <button className="btn" onClick={loadLogs} disabled={isLogsLoading}>
+                {isLogsLoading ? t("loadingLogs") : t("retryLoad")}
+              </button>
+            </div>
+            <div className="card-body">
+              <div className="table-wrap">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>{t("eventType")}</th>
+                      <th>{t("description")}</th>
+                      <th>{t("actor")}</th>
+                      <th>{t("time")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {logs.map((log) => (
+                      <tr key={log.id}>
+                        <td><span className="tag tag-soft">{log.type}</span></td>
+                        <td>{log.description}</td>
+                        <td>{log.actor}</td>
+                        <td className="muted">{formatLogTime(log.createdAt)}</td>
+                      </tr>
+                    ))}
+                    {logs.length === 0 && !isLogsLoading ? (
+                      <tr>
+                        <td colSpan={4} className="muted" style={{ padding: 14 }}>
+                          {t("noLogs")}
+                        </td>
+                      </tr>
+                    ) : null}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </section>

@@ -19,6 +19,8 @@ import alertLogsRoutes from "./routes/alertLogs.js";
 import systemLogsRoutes from "./routes/systemLogs.js";
 import aiInsightsRoutes from "./routes/aiInsights.js";
 import diseaseDetectRoutes from "./routes/diseaseDetect.js";
+import dashboardRoutes from "./routes/dashboard.js";
+import adminThresholdsRoutes from "./routes/adminThresholds.js";
 
 dotenv.config();
 
@@ -35,7 +37,7 @@ const app = express();
 app.use(
   cors({
     origin: "http://localhost:3000",
-    methods: "GET,POST,PUT,DELETE",
+    methods: "GET,POST,PUT,PATCH,DELETE",
     credentials: true,
   })
 );
@@ -65,6 +67,9 @@ app.use("/api/settings", settingsRoutes);
 app.use("/api/farms", farmsRoutes);
 app.use("/api/sensors", sensorsRoutes);
 app.use("/api/admin/users", adminUsersRoutes);
+app.use("/api/admin/thresholds", adminThresholdsRoutes);
+app.use("/api/admin/logs", systemLogsRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/thresholds", thresholdsRoutes);
 app.use("/api/alerts", alertsRoutes);
 app.use("/api/alert-logs", alertLogsRoutes);
