@@ -383,6 +383,9 @@ export default function Dashboard() {
           <Link to="/farms" className={location.pathname === "/farms" ? "active" : ""}>
             {t("crops")}
           </Link>
+          <Link to="/disease-detect" className={location.pathname === "/disease-detect" ? "active" : ""}>
+            {lang === "ar" ? "كشف الأمراض" : "Disease Detection"}
+          </Link>
           <Link to="/settings" className={location.pathname === "/settings" ? "active" : ""}>
             {t("settings")}
           </Link>

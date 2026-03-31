@@ -181,6 +181,16 @@ export async function fetchCropAIInsights(cropName) {
   };
 }
 
+export async function detectDisease(imageBase64) {
+  const res = await fetch(`${API_BASE}/api/disease-detect`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ image: imageBase64 }),
+  });
+  return safeJson(res, "Disease detection failed");
+}
+
 export async function updateSetting(key, value) {
   try {
     const res = await fetch(`${API_BASE}/api/settings/${encodeURIComponent(key)}`, {

@@ -7,6 +7,7 @@ import Farms from "./pages/Farms";
 import Settings from "./pages/Settings";
 import Admin from "./pages/Admin";
 import CropInsights from "./pages/CropInsights";
+import DiseaseDetect from "./pages/DiseaseDetect";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/crop/:cropName" element={<CropInsights />} />
+        <Route path="/disease-detect" element={<DiseaseDetect />} />
       </Routes>
     </Router>
   );

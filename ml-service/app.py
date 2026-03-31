@@ -1,12 +1,21 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 import base64
 import json
 import os
 import io
 
 app = Flask(__name__)
-CORS(app)
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return response
+
+@app.route("/<path:path>", methods=["OPTIONS"])
+def handle_options(path):
+    return jsonify({}), 200
 
 # ── File paths ────────────────────────────────────────────────────────────────
 BASE_DIR          = os.path.dirname(__file__)
@@ -89,16 +98,25 @@ def detect_disease():
         img_array = np.expand_dims(np.array(img) / 255.0, axis=0)
 
         preds = model.predict(img_array)
-        idx   = int(preds[0].argmax())
-        conf  = float(preds[0][idx])
-        label = class_names[str(idx)] if class_names else f"class_{idx}"
+        top3_idx = preds[0].argsort()[-3:][::-1]
 
-        treatment = treatments.get(label, {})
+        top3 = []
+        for i in top3_idx:
+            lbl = class_names[str(i)] if class_names else f"class_{i}"
+            tr  = treatments.get(lbl, {})
+            top3.append({
+                "label":        lbl,
+                "confidence":   round(float(preds[0][i]), 4),
+                "treatment_en": tr.get("en", "Consult an agronomist for treatment advice."),
+                "treatment_ar": tr.get("ar", "استشر خبيراً زراعياً للحصول على نصيحة العلاج."),
+            })
+
         return jsonify({
-            "label":        label,
-            "confidence":   round(conf, 4),
-            "treatment_en": treatment.get("en", "Consult an agronomist for treatment advice."),
-            "treatment_ar": treatment.get("ar", "استشر خبيراً زراعياً للحصول على نصيحة العلاج."),
+            "label":        top3[0]["label"],
+            "confidence":   top3[0]["confidence"],
+            "treatment_en": top3[0]["treatment_en"],
+            "treatment_ar": top3[0]["treatment_ar"],
+            "top3":         top3,
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500

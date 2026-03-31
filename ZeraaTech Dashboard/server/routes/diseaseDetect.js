@@ -1,7 +1,7 @@
 import express from "express";
 
 const router = express.Router();
-const FLASK_URL = process.env.FLASK_URL || "http://localhost:5000";
+const FLASK_URL = process.env.ML_SERVICE_URL || "http://localhost:5000";
 
 router.post("/", async (req, res) => {
   const { image } = req.body;
