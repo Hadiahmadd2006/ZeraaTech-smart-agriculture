@@ -192,6 +192,7 @@ export default function Admin() {
   const [user, setUser] = useState(null);
   const [lang, setLang] = useState(localStorage.getItem("lang") || "en");
   const [newUser, setNewUser] = useState({ name: "", email: "", role: "Farmer" });
+  const [inviteStatus, setInviteStatus] = useState("");
   const [thresholds, setThresholds] = useState(DEFAULT_THRESHOLDS);
   const [isSavingThresholds, setIsSavingThresholds] = useState(false);
   const [thresholdMessage, setThresholdMessage] = useState("");
@@ -431,32 +432,31 @@ export default function Admin() {
   const handleAddUser = async (e) => {
     e.preventDefault();
     if (!newUser.name.trim() || !newUser.email.trim()) return;
+    setInviteStatus("sending");
     try {
-      const res = await fetch(`${API_BASE}/api/admin/users`, {
+      const res = await fetch(`${API_BASE}/api/invitations`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: newUser.email,
-          displayName: newUser.name,
+          name: newUser.name,
           role: newUser.role === "Admin" ? "admin" : "farmer",
-          status: "Pending",
         }),
       });
 
       if (!res.ok) {
-        const contentType = res.headers.get("content-type") || "";
-        const data = contentType.includes("application/json")
-          ? await res.json().catch(() => ({}))
-          : { message: await res.text().catch(() => "") };
-        alert(data.message || `Failed to invite user (${res.status})`);
+        const data = await res.json().catch(() => ({}));
+        setInviteStatus("error:" + (data.message || `Failed to invite (${res.status})`));
         return;
       }
 
       setNewUser({ name: "", email: "", role: "Farmer" });
+      setInviteStatus("sent");
       loadTeam();
+      setTimeout(() => setInviteStatus(""), 4000);
     } catch (_) {
-      alert("Could not contact server.");
+      setInviteStatus("error:Could not contact server.");
     }
   };
 
@@ -858,11 +858,21 @@ export default function Admin() {
                 </select>
               </div>
               <div style={{ alignSelf: "flex-end" }}>
-                <button className="btn" type="submit" disabled={isLoading}>
-                  {t("invite")}
+                <button className="btn" type="submit" disabled={inviteStatus === "sending"}>
+                  {inviteStatus === "sending" ? "Sending…" : t("invite")}
                 </button>
               </div>
             </form>
+            {inviteStatus === "sent" && (
+              <p style={{ color: "#16a34a", marginTop: 10, fontSize: 14 }}>
+                Invitation email sent successfully.
+              </p>
+            )}
+            {inviteStatus.startsWith("error:") && (
+              <p style={{ color: "#ef4444", marginTop: 10, fontSize: 14 }}>
+                {inviteStatus.slice(6)}
+              </p>
+            )}
           </div>
         </section>
       </main>

@@ -29,14 +29,14 @@ passport.use(
           {
             $setOnInsert: {
               email: normalizedEmail,
-              status: "Active",
-              googleId: profile.id,
             },
             $set: {
               lastActiveAt: new Date(),
               role,
               displayName: profile.displayName || email,
               photo: photoUrl,
+              status: "Active",
+              googleId: profile.id,
             },
           },
           { upsert: true, new: true }

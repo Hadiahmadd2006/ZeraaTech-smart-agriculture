@@ -27,11 +27,17 @@ router.get(
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "http://localhost:3000/login",
-  }),
-  (req, res) => {
-    res.redirect("http://localhost:3000/dashboard");
+  (req, res, next) => {
+    passport.authenticate("google", (err, user) => {
+      if (err || !user) {
+        console.error("[auth] Google OAuth error:", err?.message || "no user");
+        return res.redirect("http://localhost:3000/login?error=oauth_failed");
+      }
+      req.login(user, (loginErr) => {
+        if (loginErr) return next(loginErr);
+        return res.redirect("http://localhost:3000/dashboard");
+      });
+    })(req, res, next);
   }
 );
 
@@ -48,6 +54,18 @@ router.post("/signup", async (req, res) => {
     const role = normalizedEmail === adminEmail ? "admin" : "farmer";
 
     const existing = await User.findOne({ email: normalizedEmail });
+
+    // Allow invited (Pending) users with no password to complete registration
+    if (existing && existing.status === "Pending" && !existing.passwordHash) {
+      existing.passwordHash = hashPassword(String(password));
+      existing.displayName  = displayName?.trim() || existing.displayName || normalizedEmail.split("@")[0];
+      existing.phone        = phone?.trim() || existing.phone || null;
+      existing.status       = "Active";
+      existing.lastActiveAt = new Date();
+      await existing.save();
+      return res.status(201).json({ id: existing._id, email: existing.email, role: existing.role });
+    }
+
     if (existing) return res.status(409).json({ message: "Email already registered" });
 
     const user = await User.create({

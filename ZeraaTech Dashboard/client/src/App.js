@@ -8,6 +8,7 @@ import Settings from "./pages/Settings";
 import Admin from "./pages/Admin";
 import CropInsights from "./pages/CropInsights";
 import DiseaseDetect from "./pages/DiseaseDetect";
+import InviteResponse from "./pages/InviteResponse";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/admin" element={<Admin />} />
         <Route path="/crop/:cropName" element={<CropInsights />} />
         <Route path="/disease-detect" element={<DiseaseDetect />} />
+        <Route path="/invite/:token" element={<InviteResponse />} />
       </Routes>
     </Router>
   );
