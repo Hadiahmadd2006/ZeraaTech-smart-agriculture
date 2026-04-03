@@ -157,7 +157,7 @@ const TEXT = {
     email: "البريد الإلكتروني",
     invite: "دعوة",
     fullName: "الاسم الكامل",
-    exampleEmail: "user@zeraa.io",
+    exampleEmail: "user@Gmail.com",
     never: "أبدًا",
     justNow: "الآن",
     unknown: "غير معروف",
