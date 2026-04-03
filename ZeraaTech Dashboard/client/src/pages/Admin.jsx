@@ -90,7 +90,7 @@ const TEXT = {
     email: "Email",
     invite: "Invite",
     fullName: "Full name",
-    exampleEmail: "user@zeraa.io",
+    exampleEmail: "user@Gmail.com",
     never: "Never",
     justNow: "Just now",
     unknown: "Unknown",
