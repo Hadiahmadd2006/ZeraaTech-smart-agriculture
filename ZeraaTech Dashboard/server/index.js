@@ -19,6 +19,7 @@ import alertLogsRoutes from "./routes/alertLogs.js";
 import systemLogsRoutes from "./routes/systemLogs.js";
 import aiInsightsRoutes from "./routes/aiInsights.js";
 import diseaseDetectRoutes from "./routes/diseaseDetect.js";
+import scanResultsRoutes from "./routes/scanResults.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import adminThresholdsRoutes from "./routes/adminThresholds.js";
 
@@ -41,7 +42,7 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 
 app.use(
   session({
@@ -76,6 +77,7 @@ app.use("/api/alert-logs", alertLogsRoutes);
 app.use("/api/system-logs", systemLogsRoutes);
 app.use("/api/ai-insights", aiInsightsRoutes);
 app.use("/api/disease-detect", diseaseDetectRoutes);
+app.use("/api/scan-results", scanResultsRoutes);
 app.use("/auth", authRoutes);
 
 app.listen(4000, () => console.log("Server running at http://localhost:4000"));

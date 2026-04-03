@@ -191,6 +191,26 @@ export async function detectDisease(imageBase64) {
   return safeJson(res, "Disease detection failed");
 }
 
+export async function saveScanResult(scanData) {
+  const res = await fetch(`${API_BASE}/api/scan-results`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(scanData),
+  });
+  return safeJson(res, "Failed to save scan result");
+}
+
+export async function fetchScanResults() {
+  try {
+    const res = await fetch(`${API_BASE}/api/scan-results`, { credentials: "include" });
+    return await safeJson(res, "Failed to fetch scan results");
+  } catch (err) {
+    console.warn("Could not fetch scan history:", err.message);
+    return [];
+  }
+}
+
 export async function updateSetting(key, value) {
   try {
     const res = await fetch(`${API_BASE}/api/settings/${encodeURIComponent(key)}`, {

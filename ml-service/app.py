@@ -26,9 +26,9 @@ def handle_options(path):
 
 # ── File paths ────────────────────────────────────────────────────────────────
 BASE_DIR          = os.path.dirname(__file__)
-MODEL_PATH        = os.path.join(BASE_DIR, "disease_model.keras")
-CLASS_NAMES_PATH  = os.path.join(BASE_DIR, "class_names.json")
-TREATMENTS_PATH   = os.path.join(BASE_DIR, "treatments.json")
+MODEL_PATH        = os.path.join(BASE_DIR, "models", "disease_model.keras")
+CLASS_NAMES_PATH  = os.path.join(BASE_DIR, "models", "class_names.json")
+TREATMENTS_PATH   = os.path.join(BASE_DIR, "models", "treatments.json")
 
 # ── Model state ───────────────────────────────────────────────────────────────
 model       = None
@@ -52,7 +52,15 @@ def load_assets():
     if os.path.exists(MODEL_PATH):
         try:
             import tensorflow as tf
-            model = tf.keras.models.load_model(MODEL_PATH)
+
+            # Monkey-patch Dense.__init__ to drop kwargs unknown to this TF version
+            _orig_dense_init = tf.keras.layers.Dense.__init__
+            def _compat_dense_init(self, *args, **kwargs):
+                kwargs.pop("quantization_config", None)
+                _orig_dense_init(self, *args, **kwargs)
+            tf.keras.layers.Dense.__init__ = _compat_dense_init
+
+            model = tf.keras.models.load_model(MODEL_PATH, compile=False)
             print("[ML] Disease model loaded successfully.")
         except Exception as e:
             print(f"[ML] Model load failed: {e}. Running in demo mode.")
@@ -102,7 +110,11 @@ def detect_disease():
 
         img_bytes = base64.b64decode(image_b64)
         img = Image.open(io.BytesIO(img_bytes)).convert("RGB").resize((224, 224))
-        img_array = np.expand_dims(np.array(img) / 255.0, axis=0)
+        # MobileNetV3 expects [-1, 1] range, not [0, 1]
+        img_array = np.expand_dims(
+            tf.keras.applications.mobilenet_v3.preprocess_input(np.array(img, dtype=np.float32)),
+            axis=0,
+        )
 
         preds = model.predict(img_array)
         top3_idx = preds[0].argsort()[-3:][::-1]
@@ -183,4 +195,4 @@ def predict_crop():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=4040, debug=True)

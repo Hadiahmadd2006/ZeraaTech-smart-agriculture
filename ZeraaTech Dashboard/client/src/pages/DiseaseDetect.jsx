@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { detectDisease } from "../api";
+import { detectDisease, saveScanResult, fetchScanResults } from "../api";
 import { syncDocumentLanguage } from "../i18n";
 
 const ADMIN_EMAIL = "ghareeb.hadi1@gmail.com";
@@ -66,7 +66,7 @@ function isHealthy(label) {
 export default function DiseaseDetect() {
   const [user, setUser] = useState(null);
   const [lang, setLang] = useState(localStorage.getItem("lang") || "en");
-  const [imageFile, setImageFile] = useState(null);
+  const [, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [result, setResult] = useState(null);
   const [scanning, setScanning] = useState(false);
@@ -91,6 +91,18 @@ export default function DiseaseDetect() {
       .catch(() => { window.location.href = "/login"; });
   }, []);
 
+  useEffect(() => {
+    fetchScanResults().then((scans) => {
+      setHistory(scans.map((s) => ({
+        id: s._id,
+        preview: s.imageThumbnail,
+        label: s.label,
+        confidence: s.confidence,
+        ts: new Date(s.scannedAt),
+      })));
+    });
+  }, []);
+
   const t = (key) => T[lang]?.[key] || T.en[key] || key;
   const userEmail = (extractEmail(user) || localStorage.getItem("user") || "").toLowerCase();
   const isAdmin = userEmail === ADMIN_EMAIL.toLowerCase();
@@ -101,7 +113,19 @@ export default function DiseaseDetect() {
     setResult(null);
     setError("");
     const reader = new FileReader();
-    reader.onload = (e) => setImagePreview(e.target.result);
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 800;
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        setImagePreview(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.src = e.target.result;
+    };
     reader.readAsDataURL(file);
   }, []);
 
@@ -115,6 +139,14 @@ export default function DiseaseDetect() {
   const onDragOver = (e) => { e.preventDefault(); setDragging(true); };
   const onDragLeave = () => setDragging(false);
 
+  const onReset = () => {
+    setImagePreview(null);
+    setResult(null);
+    setError("");
+    setImageFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const onScan = async () => {
     if (!imagePreview) { setError(t("noImage")); return; }
     setScanning(true);
@@ -124,10 +156,27 @@ export default function DiseaseDetect() {
       const base64 = imagePreview.includes(",") ? imagePreview.split(",")[1] : imagePreview;
       const data = await detectDisease(base64);
       setResult(data);
-      setHistory((prev) => [
-        { id: Date.now(), preview: imagePreview, label: data.label, confidence: data.confidence, ts: new Date() },
-        ...prev,
-      ].slice(0, 5));
+      // Save to DB (fire-and-forget — don't block the UI)
+      saveScanResult({
+        label: data.label,
+        confidence: data.confidence,
+        treatment_en: data.treatment_en,
+        treatment_ar: data.treatment_ar,
+        top3: data.top3,
+        imageThumbnail: imagePreview,
+        mock: data.mock || false,
+      }).then((saved) => {
+        setHistory((prev) => [
+          { id: saved._id, preview: imagePreview, label: data.label, confidence: data.confidence, ts: new Date(saved.scannedAt) },
+          ...prev,
+        ].slice(0, 20));
+      }).catch(() => {
+        // Still update local history if save fails
+        setHistory((prev) => [
+          { id: Date.now(), preview: imagePreview, label: data.label, confidence: data.confidence, ts: new Date() },
+          ...prev,
+        ].slice(0, 20));
+      });
     } catch (err) {
       setError(err.message || "Detection failed");
     } finally {
@@ -224,14 +273,25 @@ export default function DiseaseDetect() {
           />
         </div>
 
-        <button
-          className="btn"
-          onClick={onScan}
-          disabled={scanning || !imagePreview}
-          style={{ marginBottom: 28, minWidth: 140 }}
-        >
-          {scanning ? t("scanning") : t("scanBtn")}
-        </button>
+        <div style={{ display: "flex", gap: 12, marginBottom: 28 }}>
+          <button
+            className="btn"
+            onClick={onScan}
+            disabled={scanning || !imagePreview}
+            style={{ minWidth: 140 }}
+          >
+            {scanning ? t("scanning") : t("scanBtn")}
+          </button>
+          {(imagePreview || result) && (
+            <button
+              className="btn"
+              onClick={onReset}
+              style={{ background: "var(--panel)", color: "var(--text)", border: "1px solid var(--line)" }}
+            >
+              {lang === "ar" ? "فحص ورقة أخرى" : "Scan a different leaf"}
+            </button>
+          )}
+        </div>
 
         {error && <p style={{ color: "#ef4444", marginBottom: 16 }}>{error}</p>}
 
