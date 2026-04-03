@@ -80,12 +80,6 @@ export default function Settings() {
   }, [lang]);
 
   useEffect(() => {
-    const local = localStorage.getItem("user");
-    if (local) {
-      setUser({ email: local });
-      return;
-    }
-
     fetch("http://localhost:4000/auth/current-user", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => {
@@ -275,6 +269,9 @@ export default function Settings() {
           <Link to="/farms" className={location.pathname === "/farms" ? "active" : ""}>
             {lang === "ar" ? "المحاصيل" : "Crops"}
           </Link>
+          <Link to="/disease-detect" className={location.pathname === "/disease-detect" ? "active" : ""}>
+            {lang === "ar" ? "كشف الأمراض" : "Disease Detection"}
+          </Link>
           <Link to="/settings" className={location.pathname === "/settings" ? "active" : ""}>
             {lang === "ar" ? "الإعدادات" : "Settings"}
           </Link>
@@ -289,7 +286,7 @@ export default function Settings() {
           {user && (
             <div className="user-info">
               <img
-                src={user.photos?.[0]?.value || "/img/default-user.png"}
+                src={user.photo || "/img/default-user.png"}
                 alt="User"
                 className="user-avatar"
                 onError={(e) => {

@@ -512,6 +512,7 @@ export default function Admin() {
         <nav className="menu">
           {renderMenuLink("/dashboard", t("dashboard"))}
           {renderMenuLink("/farms", t("crops"))}
+          {renderMenuLink("/disease-detect", lang === "ar" ? "كشف الأمراض" : "Disease Detection")}
           {renderMenuLink("/settings", t("settings"))}
           {isAdmin && renderMenuLink("/admin", t("admin"))}
         </nav>
@@ -520,7 +521,7 @@ export default function Admin() {
           {user && (
             <div className="user-info">
               <img
-                src={user.photos?.[0]?.value || "/img/default-user.png"}
+                src={user.photo || "/img/default-user.png"}
                 alt="User"
                 className="user-avatar"
                 onError={(e) => {

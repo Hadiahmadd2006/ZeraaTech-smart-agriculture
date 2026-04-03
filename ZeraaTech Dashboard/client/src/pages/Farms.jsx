@@ -172,6 +172,9 @@ export default function Farms() {
           <Link to="/farms" className={location.pathname === "/farms" ? "active" : ""}>
             {lang === "ar" ? "المحاصيل" : "Crops"}
           </Link>
+          <Link to="/disease-detect" className={location.pathname === "/disease-detect" ? "active" : ""}>
+            {lang === "ar" ? "كشف الأمراض" : "Disease Detection"}
+          </Link>
           <Link to="/settings" className={location.pathname === "/settings" ? "active" : ""}>
             {lang === "ar" ? "الإعدادات" : "Settings"}
           </Link>
@@ -186,7 +189,7 @@ export default function Farms() {
           {user && (
             <div className="user-info">
               <img
-                src={user.photos?.[0]?.value || "/img/default-user.png"}
+                src={user.photo || "/img/default-user.png"}
                 alt="User"
                 className="user-avatar"
                 onError={(e) => {

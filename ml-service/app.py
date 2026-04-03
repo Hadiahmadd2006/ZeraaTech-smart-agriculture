@@ -13,6 +13,13 @@ def add_cors_headers(response):
     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
     return response
 
+@app.before_request
+def handle_options():
+    from flask import request as req
+    if req.method == "OPTIONS":
+        from flask import Response
+        return Response(status=200)
+
 @app.route("/<path:path>", methods=["OPTIONS"])
 def handle_options(path):
     return jsonify({}), 200

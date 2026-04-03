@@ -153,6 +153,9 @@ export default function CropInsights() {
           <Link to="/farms" className={location.pathname === "/farms" ? "active" : ""}>
             {t("crops")}
           </Link>
+          <Link to="/disease-detect" className={location.pathname === "/disease-detect" ? "active" : ""}>
+            {lang === "ar" ? "كشف الأمراض" : "Disease Detection"}
+          </Link>
           <Link to="/settings" className={location.pathname === "/settings" ? "active" : ""}>
             {t("settings")}
           </Link>
@@ -167,7 +170,7 @@ export default function CropInsights() {
           {user && (
             <div className="user-info">
               <img
-                src={user.photos?.[0]?.value || "/img/default-user.png"}
+                src={user.photo || "/img/default-user.png"}
                 alt="User"
                 className="user-avatar"
                 onError={(e) => {

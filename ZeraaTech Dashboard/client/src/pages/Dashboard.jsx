@@ -117,8 +117,17 @@ function getAlertPriorityValue(severity) {
   return 1;
 }
 
+const GAUGE_FALLBACK = [
+  { id: "health", label: "Health", value: 82, severity: "green" },
+  { id: "water",  label: "Water",  value: 45, severity: "yellow" },
+  { id: "soil",   label: "Soil",   value: 67, severity: "green" },
+];
+
 function buildGaugeDataFromRaw(rawData) {
   const latest = rawData?.latest || rawData || {};
+  if (!latest || (!latest.moisture && !latest.temperature && !latest.ph)) {
+    return GAUGE_FALLBACK;
+  }
 
   const health = Math.round(
     (clamp(latest.moisture) + temperatureToScore(latest.temperature) + phToScore(latest.ph)) / 3
@@ -400,7 +409,7 @@ export default function Dashboard() {
           {user && (
             <div className="user-info">
               <img
-                src={user.photos?.[0]?.value || "/img/default-user.png"}
+                src={user.photo || "/img/default-user.png"}
                 alt="User"
                 className="user-avatar"
                 onError={(e) => {
