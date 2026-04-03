@@ -3,6 +3,8 @@ import base64
 import json
 import os
 import io
+import cv2
+import numpy as np
 
 app = Flask(__name__)
 
@@ -71,6 +73,57 @@ def load_assets():
 load_assets()
 
 
+# ── Leaf preprocessing (OpenCV) ───────────────────────────────────────────────
+def preprocess_leaf(pil_img):
+    """
+    Isolate the leaf from the background using GrabCut, then enhance contrast
+    with CLAHE so the image looks closer to PlantVillage training conditions.
+    Falls back to the original image if the mask is too sparse.
+    """
+    img_bgr = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+
+    # ── GrabCut: assume the leaf occupies the central 80% ────────────────────
+    h, w = img_bgr.shape[:2]
+    rect = (int(w * 0.05), int(h * 0.05), int(w * 0.90), int(h * 0.90))
+    mask_gc   = np.zeros((h, w), np.uint8)
+    bgd_model = np.zeros((1, 65), np.float64)
+    fgd_model = np.zeros((1, 65), np.float64)
+    try:
+        cv2.grabCut(img_bgr, mask_gc, rect, bgd_model, fgd_model, 5, cv2.GC_INIT_WITH_RECT)
+    except Exception:
+        return pil_img  # GrabCut failed — return original
+
+    # Pixels labelled 2 or 0 are background
+    leaf_mask = np.where((mask_gc == 2) | (mask_gc == 0), 0, 255).astype(np.uint8)
+
+    # ── Fallback: if mask covers < 10% of image, skip segmentation ───────────
+    if leaf_mask.sum() < h * w * 255 * 0.10:
+        return pil_img
+
+    # ── Morphological cleanup ─────────────────────────────────────────────────
+    kernel    = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+    leaf_mask = cv2.morphologyEx(leaf_mask, cv2.MORPH_CLOSE, kernel)
+    leaf_mask = cv2.morphologyEx(leaf_mask, cv2.MORPH_OPEN,  kernel)
+
+    # ── Soft edge blend ───────────────────────────────────────────────────────
+    mask_blur = cv2.GaussianBlur(leaf_mask, (21, 21), 0).astype(np.float32) / 255.0
+    mask_3ch  = np.stack([mask_blur] * 3, axis=-1)
+
+    # ── Composite onto neutral grey (PlantVillage-style background) ───────────
+    img_f  = img_bgr.astype(np.float32)
+    bg     = np.full_like(img_f, 200.0)
+    result = (img_f * mask_3ch + bg * (1 - mask_3ch)).astype(np.uint8)
+
+    # ── CLAHE contrast enhancement on L channel ───────────────────────────────
+    lab      = cv2.cvtColor(result, cv2.COLOR_BGR2LAB)
+    clahe    = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    lab[:, :, 0] = clahe.apply(lab[:, :, 0])
+    result   = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+
+    from PIL import Image as PILImage
+    return PILImage.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
+
+
 # ── Health check ──────────────────────────────────────────────────────────────
 @app.route("/health", methods=["GET"])
 def health():
@@ -100,7 +153,6 @@ def detect_disease():
 
     # ── Real inference ────────────────────────────────────────────────────────
     try:
-        import numpy as np
         from PIL import Image
         import tensorflow as tf
 
@@ -109,7 +161,10 @@ def detect_disease():
             image_b64 = image_b64.split(",", 1)[1]
 
         img_bytes = base64.b64decode(image_b64)
-        img = Image.open(io.BytesIO(img_bytes)).convert("RGB").resize((224, 224))
+        img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+        # OpenCV: isolate leaf, remove background, enhance contrast
+        img = preprocess_leaf(img)
+        img = img.resize((224, 224))
         # MobileNetV3 expects [-1, 1] range, not [0, 1]
         img_array = np.expand_dims(
             tf.keras.applications.mobilenet_v3.preprocess_input(np.array(img, dtype=np.float32)),
@@ -146,9 +201,6 @@ CROP_RULES = [
     {"crop": "Tomato", "moisture": (50, 75), "temp": (20, 30), "humidity": (50, 70), "ph": (6.0, 6.8)},
     {"crop": "Potato", "moisture": (60, 80), "temp": (15, 25), "humidity": (60, 80), "ph": (5.5, 6.5)},
     {"crop": "Pepper", "moisture": (50, 70), "temp": (20, 32), "humidity": (50, 70), "ph": (6.0, 7.0)},
-    {"crop": "Wheat",  "moisture": (40, 65), "temp": (12, 25), "humidity": (40, 65), "ph": (6.0, 7.5)},
-    {"crop": "Corn",   "moisture": (55, 75), "temp": (18, 32), "humidity": (50, 75), "ph": (5.8, 7.0)},
-    {"crop": "Rice",   "moisture": (75, 95), "temp": (22, 35), "humidity": (70, 90), "ph": (5.5, 7.0)},
 ]
 
 

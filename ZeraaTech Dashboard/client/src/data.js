@@ -42,14 +42,4 @@ export const fallbackCrops = [
     status: "Monitor temperature",
     pumpStatus: "Off",
   },
-  {
-    id: "wheat-block",
-    name: "Wheat Block",
-    location: "West field",
-    crop: "Wheat",
-    areaHectares: 5.0,
-    moisture: 40,
-    status: "Drying slightly",
-    pumpStatus: "Irrigated yesterday",
-  },
 ];

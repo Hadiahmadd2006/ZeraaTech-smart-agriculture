@@ -222,8 +222,8 @@ router.get("/", async (req, res) => {
     } catch (flaskErr) {
       console.warn("[ai-insights] Flask unavailable:", flaskErr.message);
       // Heuristic fallback so we still return useful data
-      if (sensorPayload.moisture !== null && sensorPayload.moisture > 70) cropName = "Rice";
-      else if (sensorPayload.temperature !== null && sensorPayload.temperature < 18) cropName = "Wheat";
+      if (sensorPayload.moisture !== null && sensorPayload.moisture > 70) cropName = "Potato";
+      else if (sensorPayload.temperature !== null && sensorPayload.temperature < 18) cropName = "Pepper";
     }
 
     // 4. Derive actionable insights from real sensor values
