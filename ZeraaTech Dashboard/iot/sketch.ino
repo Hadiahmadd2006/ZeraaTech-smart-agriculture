@@ -33,14 +33,12 @@
 const char* WIFI_SSID     = "Wokwi-GUEST";   // Wokwi built-in WiFi
 const char* WIFI_PASSWORD = "";
 
-// ⚠️  Change SERVER_URL to your machine's local IP when running Wokwi
-// e.g. "http://192.168.1.10:4000/api/sensors/ingest"
-// localhost won't work from Wokwi — use your real LAN IP
-const char* SERVER_URL    = "http://YOUR_LOCAL_IP:4000/api/sensors/ingest";
+// ⚠️  Wokwi runs in the cloud — localhost won't work.
+// Run: npx ngrok http 4000  → copy the https URL → paste below
+const char* SERVER_URL    = "https://clear-toys-fry.loca.lt/api/sensors/ingest";
 const char* API_KEY       = "zeraatech-iot-secret-key";
 
-// Replace with the real MongoDB farm _id from your dashboard
-const char* FARM_ID       = "YOUR_FARM_ID_HERE";
+const char* FARM_ID       = "69d01a19cdfb068a97883344";  // South Farm
 const char* DEVICE_ID     = "esp32-wokwi-farm1";
 
 // Intervals
@@ -132,6 +130,7 @@ bool postReading(float temp, float hum, float moisture, float ph) {
   http.begin(SERVER_URL);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("x-api-key", API_KEY);
+  http.addHeader("bypass-tunnel-reminder", "true");
   http.setTimeout(8000);
 
   int code = http.POST(body);
