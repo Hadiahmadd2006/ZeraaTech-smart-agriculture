@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import DonutGauge from "../components/DonutGauge";
 import RecommendationTile from "../components/RecommendationTile";
-import { fetchAIInsights, fetchGauges, fetchRecs, fetchFarms, fetchSensors } from "../api";
+import { fetchAIInsights, fetchGauges, fetchRecs, fetchFarms } from "../api";
 import { Link, useLocation } from "react-router-dom";
 import { syncDocumentLanguage } from "../i18n";
 import TrendChart from "../components/TrendChart";
@@ -117,6 +117,20 @@ function getAlertPriorityValue(severity) {
   return 1;
 }
 
+// Generate 24 demo readings spanning the last 24 hours
+function buildFallbackTrend() {
+  const now = Date.now();
+  return Array.from({ length: 24 }, (_, i) => ({
+    recordedAt: new Date(now - (23 - i) * 60 * 60 * 1000).toISOString(),
+    temperature: 22 + Math.sin(i / 4) * 4 + Math.random(),
+    humidity:    58 + Math.cos(i / 5) * 8 + Math.random(),
+    moisture:    55 + Math.sin(i / 6) * 10 + Math.random(),
+    ph:          6.2 + Math.sin(i / 8) * 0.6,
+  }));
+}
+
+const TREND_FALLBACK = buildFallbackTrend();
+
 const GAUGE_FALLBACK = [
   { id: "health", label: "Health", value: 82, severity: "green" },
   { id: "water",  label: "Water",  value: 45, severity: "yellow" },
@@ -166,7 +180,7 @@ export default function Dashboard() {
     diseaseRiskScores: [],
     prioritizedAlerts: [],
   });
-  const [trendData, setTrendData] = useState([]);
+  const [trendData, setTrendData] = useState(TREND_FALLBACK);
   const [farms, setFarms] = useState([]);
   const [selectedFarm, setSelectedFarm] = useState("");
   const [user, setUser] = useState(null);
@@ -216,11 +230,10 @@ export default function Dashboard() {
         setLoading(true);
       }
 
-      const [g, r, ai, sensors] = await Promise.all([
+      const [g, r, ai] = await Promise.all([
         fetchGauges(farmId),
         fetchRecs(farmId),
         fetchAIInsights(farmId),
-        fetchSensors(farmId),
       ]);
 
       let gaugeData = [];
@@ -229,11 +242,12 @@ export default function Dashboard() {
         gaugeData = g;
       } else if (g && typeof g === "object") {
         gaugeData = buildGaugeDataFromRaw(g);
+        // g comes from /api/dashboard/latest which returns { latest, trend }
+        setTrendData(Array.isArray(g.trend) && g.trend.length > 0 ? g.trend : TREND_FALLBACK);
       }
 
       setGauges(gaugeData);
       setRecs(Array.isArray(r) ? r : []);
-      setTrendData(Array.isArray(sensors) ? sensors : []);
       setAiInsights({
         irrigationRecommendations: ai?.irrigationRecommendations || [],
         diseaseRiskScores: ai?.diseaseRiskScores || [],
