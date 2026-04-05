@@ -55,7 +55,6 @@ def load_assets():
         try:
             import tensorflow as tf
 
-            # Monkey-patch Dense.__init__ to drop kwargs unknown to this TF version
             _orig_dense_init = tf.keras.layers.Dense.__init__
             def _compat_dense_init(self, *args, **kwargs):
                 kwargs.pop("quantization_config", None)
@@ -91,9 +90,8 @@ def preprocess_leaf(pil_img):
     try:
         cv2.grabCut(img_bgr, mask_gc, rect, bgd_model, fgd_model, 5, cv2.GC_INIT_WITH_RECT)
     except Exception:
-        return pil_img  # GrabCut failed — return original
+        return pil_img  
 
-    # Pixels labelled 2 or 0 are background
     leaf_mask = np.where((mask_gc == 2) | (mask_gc == 0), 0, 255).astype(np.uint8)
 
     # ── Fallback: if mask covers < 10% of image, skip segmentation ───────────
@@ -162,10 +160,8 @@ def detect_disease():
 
         img_bytes = base64.b64decode(image_b64)
         img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-        # OpenCV: isolate leaf, remove background, enhance contrast
         img = preprocess_leaf(img)
         img = img.resize((224, 224))
-        # MobileNetV3 expects [-1, 1] range, not [0, 1]
         img_array = np.expand_dims(
             tf.keras.applications.mobilenet_v3.preprocess_input(np.array(img, dtype=np.float32)),
             axis=0,
