@@ -6,6 +6,7 @@ import { Link, useLocation } from "react-router-dom";
 import { syncDocumentLanguage } from "../i18n";
 import TrendChart from "../components/TrendChart";
 import SensorHistoryChart from "../components/SensorHistoryChart";
+import { io } from "socket.io-client";
 
 const GAUGE_LABELS = {
   en: { health: "Health", water: "Water", soil: "Soil" },
@@ -307,11 +308,24 @@ export default function Dashboard() {
   useEffect(() => {
     if (!selectedFarm) return;
 
+    // WebSocket real-time updates
+    const socket = io("http://localhost:4000", { withCredentials: true });
+    socket.on("new-sensor-reading", (data) => {
+      if (data.farm === selectedFarm) {
+        // Trigger a silent reload immediately
+        load(selectedFarm, true);
+      }
+    });
+
+    // Fallback polling
     const interval = setInterval(() => {
       load(selectedFarm, true);
     }, 10000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      socket.disconnect();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFarm]);
 

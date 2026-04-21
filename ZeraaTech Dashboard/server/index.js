@@ -1,4 +1,6 @@
 import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
 import cors from "cors";
 import session from "express-session";
 import passport from "./config/passport.js";
@@ -45,6 +47,24 @@ app.use(
 );
 app.use(express.json({ limit: "10mb" }));
 
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true,
+  },
+});
+
+app.set("io", io);
+
+io.on("connection", (socket) => {
+  console.log("Client connected to WebSocket:", socket.id);
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
+  });
+});
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "zeraatech-dev-session-secret",
@@ -82,4 +102,4 @@ app.use("/api/scan-results", scanResultsRoutes);
 app.use("/api/invitations", invitationsRoutes);
 app.use("/auth", authRoutes);
 
-app.listen(4000, () => console.log("Server running at http://localhost:4000"));
+httpServer.listen(4000, () => console.log("Server running at http://localhost:4000"));

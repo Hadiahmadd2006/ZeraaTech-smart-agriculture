@@ -109,6 +109,12 @@ router.post("/", async (req, res) => {
     checkThresholdsAndCreateAlerts(reading).catch((err) =>
       console.error("[AlertEngine] Error:", err.message)
     );
+
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("new-sensor-reading", reading);
+    }
+
     res.status(201).json(reading);
   } catch (err) {
     res.status(400).json({ message: "Failed to create sensor reading", error: err.message });
@@ -184,6 +190,11 @@ router.post("/ingest", async (req, res) => {
     checkThresholdsAndCreateAlerts(reading).catch((err) =>
       console.error("[AlertEngine] IoT ingest error:", err.message)
     );
+
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("new-sensor-reading", reading);
+    }
 
     res.status(201).json({ message: "Sensor payload ingested successfully", reading });
   } catch (err) {
