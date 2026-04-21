@@ -54,3 +54,4 @@ NOT_IGNORED_FILES.txt
 /ZeraaTech Dashboard/server/node_modules/mongodb/src
 /ZeraaTech Dashboard/server/node_modules/mongodb
 /ZeraaTech Dashboard/server/node_modules
+/ml-service/venv

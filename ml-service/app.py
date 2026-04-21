@@ -168,7 +168,24 @@ def detect_disease():
         )
 
         preds = model.predict(img_array)
-        top3_idx = preds[0].argsort()[-3:][::-1]
+        
+        # Auto-detect species by aggregating probabilities across all classes for each species
+        species_probs = {}
+        for i, prob in enumerate(preds[0]):
+            class_name = class_names.get(str(i), "") if class_names else ""
+            species = class_name.split('___')[0] if '___' in class_name else ""
+            if species:
+                species_probs[species] = species_probs.get(species, 0) + float(prob)
+        
+        detected_species = max(species_probs, key=species_probs.get) if species_probs else ""
+        
+        if detected_species and class_names:
+            valid_indices = [int(i) for i, name in class_names.items() if name.startswith(detected_species)]
+            filtered_preds = [(i, preds[0][i]) for i in valid_indices]
+            filtered_preds.sort(key=lambda x: x[1], reverse=True)
+            top3_idx = [i for i, p in filtered_preds[:3]]
+        else:
+            top3_idx = preds[0].argsort()[-3:][::-1]
 
         top3 = []
         for i in top3_idx:
