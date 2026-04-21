@@ -1,6 +1,7 @@
 import { Router } from "express";
 import SensorReading from "../models/SensorReading.js";
 import Farm from "../models/Farm.js";
+import Threshold from "../models/Threshold.js";
 import IngestionLog from "../models/IngestionLog.js";
 import { attachAppUser, requireAuth } from "../middleware/auth.js";
 import { checkThresholdsAndCreateAlerts } from "../services/alertEngine.js";
@@ -38,6 +39,61 @@ router.get("/", async (req, res) => {
     res.json(readings);
   } catch (err) {
     res.status(500).json({ message: "Failed to load sensor readings", error: err.message });
+  }
+});
+
+router.get("/history", async (req, res) => {
+  try {
+    const { farm, type, hours = 24 } = req.query;
+    if (!farm || !type) {
+      return res.status(400).json({ message: "farm and type are required" });
+    }
+
+    const ok = await canAccessFarm(req.appUser, farm);
+    if (!ok) return res.status(403).json({ message: "Forbidden" });
+
+    // Map the dashboard gauge type to the actual sensor property
+    // "water" -> "moisture", "soil" -> "ph"
+    let sensorField = type;
+    if (type === "water") sensorField = "moisture";
+    if (type === "soil") sensorField = "ph";
+
+    const since = new Date(Date.now() - Number(hours) * 60 * 60 * 1000);
+
+    const query = {
+      farm,
+      recordedAt: { $gte: since },
+    };
+
+    // If it's a specific sensor, we can filter out readings where it's null, 
+    // but we can just fetch all and map on the frontend.
+    const readings = await SensorReading.find(query)
+      .sort({ recordedAt: 1 })
+      .select(`recordedAt temperature moisture ph humidity`)
+      .lean();
+
+    // Fetch thresholds
+    let minThreshold = null;
+    let maxThreshold = null;
+
+    if (sensorField === "moisture") {
+      minThreshold = await Threshold.findOne({ key: "soilMoistureMin" });
+      maxThreshold = await Threshold.findOne({ key: "soilMoistureMax" });
+    } else if (sensorField === "ph") {
+      minThreshold = await Threshold.findOne({ key: "phMin" });
+      maxThreshold = await Threshold.findOne({ key: "phMax" });
+    } else if (sensorField === "temperature") {
+      minThreshold = await Threshold.findOne({ key: "temperatureMin" });
+      maxThreshold = await Threshold.findOne({ key: "temperatureMax" });
+    }
+
+    res.json({
+      data: readings,
+      minThreshold: minThreshold?.value ?? null,
+      maxThreshold: maxThreshold?.value ?? null,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to load sensor history", error: err.message });
   }
 });
 

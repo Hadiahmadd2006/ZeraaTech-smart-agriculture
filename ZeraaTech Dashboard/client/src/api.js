@@ -98,15 +98,27 @@ export async function fetchRecs(farmId) {
 
 export async function fetchSensors(farmId) {
   try {
-    const res = await fetch(withFarmId(`${API_BASE}/api/sensors`, farmId), {
-      credentials: "include",
-    });
-    return await safeJson(res, "Failed to fetch sensor data");
+    const url = withFarmId(`${API_BASE}/api/sensors`, farmId);
+    const res = await fetch(url, { credentials: "include" });
+    return await safeJson(res, "Failed to fetch sensors");
   } catch (err) {
-    console.warn("Could not fetch sensor data:", err.message);
-    return null;
+    console.warn("Failed to fetch sensors:", err.message);
+    return [];
   }
 }
+
+export async function fetchSensorHistory(farmId, type, hours = 24) {
+  try {
+    if (!farmId) return { data: [], minThreshold: null, maxThreshold: null };
+    const url = `${API_BASE}/api/sensors/history?farm=${encodeURIComponent(farmId)}&type=${encodeURIComponent(type)}&hours=${hours}`;
+    const res = await fetch(url, { credentials: "include" });
+    return await safeJson(res, "Failed to fetch sensor history");
+  } catch (err) {
+    console.warn("Failed to fetch sensor history:", err.message);
+    return { data: [], minThreshold: null, maxThreshold: null };
+  }
+}
+
 
 export async function fetchCrops() {
   try {

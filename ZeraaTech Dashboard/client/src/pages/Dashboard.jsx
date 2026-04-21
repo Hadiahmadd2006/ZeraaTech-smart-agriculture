@@ -5,6 +5,7 @@ import { fetchAIInsights, fetchGauges, fetchRecs, fetchFarms } from "../api";
 import { Link, useLocation } from "react-router-dom";
 import { syncDocumentLanguage } from "../i18n";
 import TrendChart from "../components/TrendChart";
+import SensorHistoryChart from "../components/SensorHistoryChart";
 
 const GAUGE_LABELS = {
   en: { health: "Health", water: "Water", soil: "Soil" },
@@ -356,8 +357,9 @@ export default function Dashboard() {
               <option>{t("weekly")}</option>
             </select>
           </div>
-          <div className="card-body center">
+          <div className="card-body center" style={{ flexDirection: 'column' }}>
             <DonutGauge value={g.value} severity={g.severity} />
+            <SensorHistoryChart farmId={selectedFarm} type={g.id} lang={lang} />
           </div>
         </div>
       );
