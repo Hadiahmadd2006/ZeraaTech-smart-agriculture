@@ -34,23 +34,15 @@ body {
   min-height: 100vh;
 }
 
-.wrap[dir="rtl"] {
-  grid-template-columns: 1fr 240px;
-  grid-template-areas: "main sidebar";
-}
+
 
 .sidebar {
   grid-area: sidebar;
   padding: 18px;
   background: var(--panel);
-  border-right: 1px solid var(--line);
+  border-inline-end: 1px solid var(--line);
   display: flex;
   flex-direction: column;
-}
-
-[dir="rtl"] .sidebar {
-  border-right: 0;
-  border-left: 1px solid var(--line);
 }
 
 .main {
@@ -140,10 +132,7 @@ body {
   color: var(--text);
   text-decoration: none;
   cursor: pointer;
-}
-
-[dir="rtl"] .menu a {
-  text-align: right;
+  text-align: start;
 }
 
 .menu a.active {

@@ -100,7 +100,7 @@ export default function TrendChart({ data = [] }) {
   };
 
   return (
-    <div style={{ height: "250px", width: "100%" }}>
+    <div style={{ height: "250px", width: "100%" }} dir="ltr">
       <Line data={chartData} options={options} />
     </div>
   );

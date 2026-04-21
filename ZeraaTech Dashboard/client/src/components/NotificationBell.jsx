@@ -69,7 +69,7 @@ export default function NotificationBell({ lang = "en" }) {
   };
 
   return (
-    <div style={{ position: "relative", display: "inline-block", marginRight: lang === "ar" ? "0" : "15px", marginLeft: lang === "ar" ? "15px" : "0" }} ref={dropdownRef}>
+    <div style={{ position: "relative", display: "inline-block", marginInlineEnd: "15px" }} ref={dropdownRef}>
       <button 
         onClick={toggleDropdown}
         style={{

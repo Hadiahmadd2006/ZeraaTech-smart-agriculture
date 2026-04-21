@@ -67,7 +67,7 @@ const AI_TEXT = {
     refresh: "تحديث",
     recommendations: "التوصيات",
     todayTasks: "مهام اليوم",
-    searchPlaceholder: "ابحث في المزارع والتنبيهات",
+    searchPlaceholder: "البحث في المزارع والتنبيهات",
     selectFarm: "اختر المزرعة",
     loading: "جاري تحميل لوحة التحكم...",
     refreshing: "جاري تحديث البيانات...",
@@ -366,7 +366,7 @@ export default function Dashboard() {
       return (
         <div className="card" key={g.id}>
           <div className="card-head">
-            <div className="card-title">{title}</div>
+            <div className="card-title" style={{ textAlign: "start", flex: 1 }}>{title}</div>
             <select className="chip" defaultValue={t("daily")}>
               <option>{t("daily")}</option>
               <option>{t("weekly")}</option>
@@ -411,7 +411,7 @@ export default function Dashboard() {
       <aside className="sidebar">
         <div className="brand">
           <div className="logo" />
-          <span style={{ fontWeight: "600", fontSize: "1.1em", marginLeft: "6px" }}>
+          <span style={{ fontWeight: "600", fontSize: "1.1em", marginInlineStart: "6px" }}>
             ZeraaTech
           </span>
         </div>
@@ -462,10 +462,12 @@ export default function Dashboard() {
 
       <main className="main">
         <div className="top">
-          <input className="search" placeholder={t("searchPlaceholder")} />
+          <div style={{ display: "flex", gap: "10px", alignItems: "center", flex: 1 }}>
+            <NotificationBell lang={lang} />
+            <input className="search" placeholder={t("searchPlaceholder")} style={{ maxWidth: "400px" }} />
+          </div>
 
           <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
-            <NotificationBell lang={lang} />
             <label style={{ fontSize: "14px" }}>{t("selectFarm")}:</label>
             <select className="chip" value={selectedFarm} onChange={handleFarmChange}>
               {farms.length === 0 ? (
@@ -489,8 +491,8 @@ export default function Dashboard() {
           {gaugeCards}
           <div className="card wide">
             <div className="card-head">
-             <div className="card-title">{t("trends24h")}</div>
-           </div>
+              <div className="card-title" style={{ textAlign: "start", flex: 1 }}>{t("trends24h")}</div>
+            </div>
             <div className="card-body">
             {trendData.length > 0 ? (
   <TrendChart data={trendData} />
@@ -502,7 +504,7 @@ export default function Dashboard() {
 
           <div className="card wide">
             <div className="card-head">
-              <div className="card-title">{t("recommendations")}</div>
+              <div className="card-title" style={{ textAlign: "start", flex: 1 }}>{t("recommendations")}</div>
             </div>
             <div className="recs">
               {recs.map((r) => (
@@ -518,7 +520,7 @@ export default function Dashboard() {
 
           <div className="card">
             <div className="card-head">
-              <div className="card-title">{t("todayTasks")}</div>
+              <div className="card-title" style={{ textAlign: "start", flex: 1 }}>{t("todayTasks")}</div>
             </div>
             <ul className="list">
               {TASKS[lang].map((text, index) => {

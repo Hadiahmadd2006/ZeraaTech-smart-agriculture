@@ -153,7 +153,7 @@ export default function SensorHistoryChart({ farmId, type, lang = "en" }) {
   };
 
   return (
-    <div style={{ height: "250px", width: "100%", marginTop: "20px" }}>
+    <div style={{ height: "250px", width: "100%", marginTop: "20px" }} dir="ltr">
       <Line data={chartData} options={options} />
     </div>
   );
