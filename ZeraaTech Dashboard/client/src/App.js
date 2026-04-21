@@ -9,12 +9,13 @@ import Admin from "./pages/Admin";
 import CropInsights from "./pages/CropInsights";
 import DiseaseDetect from "./pages/DiseaseDetect";
 import InviteResponse from "./pages/InviteResponse";
+import Landing from "./pages/Landing";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={<Dashboard />} />

@@ -22,6 +22,7 @@ const alertSchema = new mongoose.Schema(
       default: "Low",
     },
     dedupeKey: { type: String, index: true },
+    read: { type: Boolean, default: false },
     acknowledgedAt: { type: Date },
     acknowledgedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     createdAt: { type: Date, default: Date.now, index: true },

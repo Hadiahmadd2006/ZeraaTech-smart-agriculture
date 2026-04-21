@@ -6,6 +6,7 @@ import { Link, useLocation } from "react-router-dom";
 import { syncDocumentLanguage } from "../i18n";
 import TrendChart from "../components/TrendChart";
 import SensorHistoryChart from "../components/SensorHistoryChart";
+import NotificationBell from "../components/NotificationBell";
 import { io } from "socket.io-client";
 
 const GAUGE_LABELS = {
@@ -464,6 +465,7 @@ export default function Dashboard() {
           <input className="search" placeholder={t("searchPlaceholder")} />
 
           <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <NotificationBell lang={lang} />
             <label style={{ fontSize: "14px" }}>{t("selectFarm")}:</label>
             <select className="chip" value={selectedFarm} onChange={handleFarmChange}>
               {farms.length === 0 ? (

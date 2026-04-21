@@ -130,6 +130,29 @@ export async function fetchCrops() {
   }
 }
 
+export async function fetchUnreadAlerts() {
+  try {
+    const res = await fetch(`${API_BASE}/api/alerts/unread-count`, { credentials: "include" });
+    return await safeJson(res, "Failed to fetch unread alerts");
+  } catch (err) {
+    console.warn("Failed to fetch unread alerts:", err.message);
+    return { count: 0, latest: [] };
+  }
+}
+
+export async function markAlertsAsRead() {
+  try {
+    const res = await fetch(`${API_BASE}/api/alerts/mark-read`, {
+      method: "PATCH",
+      credentials: "include",
+    });
+    return await safeJson(res, "Failed to mark alerts as read");
+  } catch (err) {
+    console.warn("Failed to mark alerts as read:", err.message);
+    return { success: false };
+  }
+}
+
 export async function fetchSettings() {
   try {
     const res = await fetch(`${API_BASE}/api/settings`, { credentials: "include" });

@@ -14,6 +14,40 @@ async function canAccessFarm(appUser, farmId) {
   return String(farm.owner) === String(appUser._id);
 }
 
+router.get("/unread-count", async (req, res) => {
+  try {
+    const query = { read: false };
+
+    if (req.appUser.role !== "admin") {
+      const farms = await Farm.find({ owner: req.appUser._id }).select("_id");
+      query.farm = { $in: farms.map((f) => f._id) };
+    }
+
+    const count = await Alert.countDocuments(query);
+    const latest = await Alert.find(query).sort({ createdAt: -1 }).limit(10);
+
+    res.json({ count, latest });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to load unread alerts", error: err.message });
+  }
+});
+
+router.patch("/mark-read", async (req, res) => {
+  try {
+    const query = { read: false };
+
+    if (req.appUser.role !== "admin") {
+      const farms = await Farm.find({ owner: req.appUser._id }).select("_id");
+      query.farm = { $in: farms.map((f) => f._id) };
+    }
+
+    await Alert.updateMany(query, { $set: { read: true } });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to mark alerts as read", error: err.message });
+  }
+});
+
 router.get("/", async (req, res) => {
   try {
     const { farmId, status, limit } = req.query;
