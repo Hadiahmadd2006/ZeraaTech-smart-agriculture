@@ -1,0 +1,14 @@
+{
+  "Healthy": {
+    "en": "Plant is healthy. Continue current irrigation and monitoring schedule.",
+    "ar": "النبات بصحة جيدة. استمر في جدول الري والمراقبة الحالي."
+  },
+  "Moderate Stress": {
+    "en": "Plant is under moderate stress. Check soil moisture and consider light irrigation. Inspect for early signs of disease.",
+    "ar": "النبات يعاني من ضغط متوسط. تحقق من رطوبة التربة وفكر في الري الخفيف. افحص العلامات المبكرة للمرض."
+  },
+  "High Stress": {
+    "en": "Plant is under high stress. Irrigate immediately, reduce sun exposure with shade cloth, and check pH balance. Consider soil treatment.",
+    "ar": "النبات في حالة ضغط حاد. اروي على الفور، قلل التعرض للشمس بقماش التظليل، وتحقق من توازن الأس الهيدروجيني. فكر في معالجة التربة."
+  }
+}

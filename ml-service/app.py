@@ -5,7 +5,8 @@ import os
 import io
 import cv2
 import numpy as np
-
+import pickle
+import pandas as pd
 app = Flask(__name__)
 
 @app.after_request
@@ -23,7 +24,7 @@ def handle_options():
         return Response(status=200)
 
 @app.route("/<path:path>", methods=["OPTIONS"])
-def handle_options(path):
+def handle_options_route(path):
     return jsonify({}), 200
 
 # ── File paths ────────────────────────────────────────────────────────────────
@@ -208,6 +209,51 @@ def detect_disease():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+# ── Treatment prediction ──────────────────────────────────────────────────────
+TREATMENT_MODEL_PATH    = os.path.join(BASE_DIR, "models", "treatment_model.pkl")
+TREATMENT_ADVICE_PATH   = os.path.join(BASE_DIR, "models", "treatment_advice.json")
+TREATMENT_FEATURES_PATH = os.path.join(BASE_DIR, "models", "treatment_features.json")
+
+try:
+    treatment_model = pickle.load(open(TREATMENT_MODEL_PATH, 'rb'))
+    treatment_advice = json.load(open(TREATMENT_ADVICE_PATH, encoding='utf-8'))
+    treatment_features = json.load(open(TREATMENT_FEATURES_PATH))
+    print("[ML] Treatment advisor assets loaded.")
+except Exception as e:
+    print(f"[ML] Warning: Treatment advisor assets not fully loaded: {e}")
+    treatment_model = None
+    treatment_advice = {}
+    treatment_features = []
+
+@app.route('/predict-treatment', methods=['POST'])
+def predict_treatment_endpoint():
+    data = request.json or {}
+    lang = data.get('lang', 'en')
+    
+    if not treatment_model or not treatment_features:
+        return jsonify({"error": "Treatment model not loaded"}), 500
+
+    try:
+        X_input = pd.DataFrame([[
+            data.get('moisture', 50),
+            data.get('temperature', 25),
+            data.get('humidity', 50),
+            data.get('pH', data.get('ph', 6.5))
+        ]], columns=treatment_features)
+        
+        status = treatment_model.predict(X_input)[0]
+        confidence = float(treatment_model.predict_proba(X_input).max())
+        advice = treatment_advice.get(status, {}).get(lang, "Consult an expert.")
+        
+        return jsonify({
+            'status': status,
+            'confidence': confidence,
+            'advice': advice,
+            'language': lang
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # ── Crop recommendation (rule-based decision tree) ────────────────────────────
 CROP_RULES = [
