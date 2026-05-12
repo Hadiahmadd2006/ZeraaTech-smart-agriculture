@@ -7,6 +7,7 @@ import { syncDocumentLanguage } from "../i18n";
 import TrendChart from "../components/TrendChart";
 import SensorHistoryChart from "../components/SensorHistoryChart";
 import NotificationBell from "../components/NotificationBell";
+import TreatmentAdvisorCard from "../components/TreatmentAdvisorCard";
 import { io } from "socket.io-client";
 
 const GAUGE_LABELS = {
@@ -183,6 +184,7 @@ export default function Dashboard() {
     diseaseRiskScores: [],
     prioritizedAlerts: [],
   });
+  const [latestSensors, setLatestSensors] = useState({});
   const [trendData, setTrendData] = useState(TREND_FALLBACK);
   const [farms, setFarms] = useState([]);
   const [selectedFarm, setSelectedFarm] = useState("");
@@ -245,6 +247,9 @@ export default function Dashboard() {
         gaugeData = g;
       } else if (g && typeof g === "object") {
         gaugeData = buildGaugeDataFromRaw(g);
+        if (g.latest) {
+          setLatestSensors(g.latest);
+        }
         // g comes from /api/dashboard/latest which returns { latest, trend }
         setTrendData(Array.isArray(g.trend) && g.trend.length > 0 ? g.trend : TREND_FALLBACK);
       }
@@ -517,6 +522,8 @@ export default function Dashboard() {
               ))}
             </div>
           </div>
+
+          <TreatmentAdvisorCard sensors={latestSensors} lang={lang} />
 
           <div className="card">
             <div className="card-head">
