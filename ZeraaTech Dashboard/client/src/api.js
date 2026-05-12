@@ -260,3 +260,13 @@ export async function updateSetting(key, value) {
     throw err;
   }
 }
+
+export async function getTreatmentAdvice(data) {
+  const res = await fetch(`${API_BASE}/api/predict-treatment`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+  return safeJson(res, "Treatment prediction failed");
+}
