@@ -25,6 +25,7 @@ import scanResultsRoutes from "./routes/scanResults.js";
 import invitationsRoutes from "./routes/invitations.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import adminThresholdsRoutes from "./routes/adminThresholds.js";
+import treatmentAdvisorRoutes from "./routes/treatmentAdvisor.js";
 
 dotenv.config();
 
@@ -100,6 +101,7 @@ app.use("/api/ai-insights", aiInsightsRoutes);
 app.use("/api/disease-detect", diseaseDetectRoutes);
 app.use("/api/scan-results", scanResultsRoutes);
 app.use("/api/invitations", invitationsRoutes);
+app.use("/api/predict-treatment", treatmentAdvisorRoutes);
 app.use("/auth", authRoutes);
 
 httpServer.listen(4000, () => console.log("Server running at http://localhost:4000"));
