@@ -494,7 +494,7 @@ export default function Dashboard() {
 
         <section className="cards">
           {gaugeCards}
-          <div className="card wide">
+          <div className="card full-width">
             <div className="card-head">
               <div className="card-title" style={{ textAlign: "start", flex: 1 }}>{t("trends24h")}</div>
             </div>
@@ -507,39 +507,7 @@ export default function Dashboard() {
            </div>
           </div>
 
-          <div className="card wide">
-            <div className="card-head">
-              <div className="card-title" style={{ textAlign: "start", flex: 1 }}>{t("recommendations")}</div>
-            </div>
-            <div className="recs">
-              {recs.map((r) => (
-                <RecommendationTile
-                  key={r.id}
-                  {...r}
-                  lang={lang}
-                  to={`/crop/${encodeURIComponent(String(r.plant || "").toLowerCase())}`}
-                />
-              ))}
-            </div>
-          </div>
-
           <TreatmentAdvisorCard sensors={latestSensors} lang={lang} />
-
-          <div className="card">
-            <div className="card-head">
-              <div className="card-title" style={{ textAlign: "start", flex: 1 }}>{t("todayTasks")}</div>
-            </div>
-            <ul className="list">
-              {TASKS[lang].map((text, index) => {
-                const colorClass = index === 0 ? "green" : index === 1 ? "yellow" : "red";
-                return (
-                  <li key={index}>
-                    <span className={`dot ${colorClass}`} /> {text}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
 
           <div className="card">
             <div className="card-head">

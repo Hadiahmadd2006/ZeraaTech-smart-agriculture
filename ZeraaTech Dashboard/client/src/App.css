@@ -192,6 +192,10 @@ body {
   grid-column: span 2;
 }
 
+.card.full-width {
+  grid-column: 1 / -1;
+}
+
 .card-head {
   display: flex;
   justify-content: space-between;
