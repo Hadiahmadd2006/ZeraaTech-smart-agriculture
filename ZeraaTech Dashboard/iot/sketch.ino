@@ -1,45 +1,35 @@
 /*
- * ZeraaTech Smart Agriculture — ESP32 IoT Firmware
- * Wokwi simulation: ESP32 + DHT22 + potentiometer + 3 LEDs
+ * ZeraaTech Smart Agriculture — ESP32 IoT Firmware (LoRa Node)
+ * Hardware: ESP32 + DHT22 + Capacitive Soil Moisture Sensor + LoRa Module
  *
  * Sensors:
  *   - DHT22  → temperature (°C) + humidity (%)
- *   - POT 1  → soil moisture (0–100%)
- *   - POT 2  → pH (4.0–9.0)   [map second pot or share one]
+ *   - SOIL   → real soil moisture (inverted ADC reading)
  *
- * LEDs:
- *   - GREEN  → readings normal, last POST succeeded
- *   - YELLOW (Blue LED) → anomaly detected / warning
- *   - RED    → POST failed or critical threshold
- *
- * Sends JSON to POST /api/sensors/ingest every 60 s.
- * Header: x-api-key: zeraatech-iot-secret-key
+ * Transmits JSON payload via LoRa radio every 60 s.
+ * Requires a separate LoRa Gateway to receive and forward to the internet.
  */
 
-#include <WiFi.h>
-#include <HTTPClient.h>
+#include <SPI.h>
+#include <LoRa.h>
 #include <DHTesp.h>
 #include <ArduinoJson.h>
 
 // ── Pin definitions ───────────────────────────────────────────────────────────
-#define DHT_PIN       33      // DHT22 data pin
-#define POT_MOISTURE  34      // Potentiometer → soil moisture (ADC1)
-#define POT_PH        35      // Potentiometer → pH (ADC1)
-#define LED_GREEN     25
-#define LED_YELLOW    26      // Blue LED on circuit = warning
-#define LED_RED       27
+#define DHT_PIN          33      // DHT22 data pin
+#define SOIL_SENSOR_PIN  34      // Real capacitive soil moisture sensor (ADC1)
 
-// ── Config ────────────────────────────────────────────────────────────────────
-const char* WIFI_SSID     = "Wokwi-GUEST";   // Wokwi built-in WiFi
-const char* WIFI_PASSWORD = "";
+// ── LoRa Config ───────────────────────────────────────────────────────────────
+// Adjust these SPI pins to match your ESP32-to-LoRa module wiring
+#define ss 5
+#define rst 14
+#define dio0 2
+// Adjust the band for your region (433E6 for Asia/Europe, 868E6 for Europe, 915E6 for NA)
+#define BAND 433E6 
 
-// ⚠️  Wokwi runs in the cloud — localhost won't work.
-// Run: npx ngrok http 4000  → copy the https URL → paste below
-const char* SERVER_URL    = "https://clear-toys-fry.loca.lt/api/sensors/ingest";
-const char* API_KEY       = "zeraatech-iot-secret-key";
-
+// ── System Config ─────────────────────────────────────────────────────────────
 const char* FARM_ID       = "69d01a19cdfb068a97883344";  // South Farm
-const char* DEVICE_ID     = "esp32-wokwi-farm1";
+const char* DEVICE_ID     = "esp32-lora-node-farm1";
 
 // Intervals
 const unsigned long NORMAL_INTERVAL = 60000;  // 60 s
@@ -56,13 +46,6 @@ float humHistory[10];
 int   historyIndex = 0;
 bool  historyFull  = false;
 
-// ── LED helpers ───────────────────────────────────────────────────────────────
-void setLed(bool green, bool yellow, bool red) {
-  digitalWrite(LED_GREEN,  green  ? HIGH : LOW);
-  digitalWrite(LED_YELLOW, yellow ? HIGH : LOW);
-  digitalWrite(LED_RED,    red    ? HIGH : LOW);
-}
-
 // ── Outlier check (simple 2-sigma) ───────────────────────────────────────────
 bool isOutlier(float value, float* history, int len) {
   if (len < 5) return false;
@@ -76,74 +59,53 @@ bool isOutlier(float value, float* history, int len) {
   return abs(value - avg) > 2 * stdDev;
 }
 
-// ── WiFi connection ───────────────────────────────────────────────────────────
-void connectWiFi() {
-  Serial.printf("[WiFi] Connecting to %s", WIFI_SSID);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
-    delay(500);
-    Serial.print(".");
-    attempts++;
-  }
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.printf("\n[WiFi] Connected. IP: %s\n", WiFi.localIP().toString().c_str());
-    setLed(true, false, false);
-  } else {
-    Serial.println("\n[WiFi] FAILED — running offline");
-    setLed(false, false, true);
-  }
-}
-
 // ── Read sensors ─────────────────────────────────────────────────────────────
 float readMoisture() {
-  int raw = analogRead(POT_MOISTURE);          // 0–4095
-  return map(raw, 0, 4095, 0, 100);           // 0–100 %
+  int raw = analogRead(SOIL_SENSOR_PIN);
+  
+  // Capacitive soil sensors typically read HIGH when dry and LOW when wet.
+  // Example calibration: 3500 (completely dry), 1500 (submerged in water)
+  // You must test your specific sensor and update these values!
+  int dryValue = 3500;
+  int wetValue = 1500;
+  
+  float moisture = map(raw, dryValue, wetValue, 0, 100);
+  
+  // Clamp values between 0% and 100%
+  if (moisture < 0) moisture = 0;
+  if (moisture > 100) moisture = 100;
+  
+  return moisture;
 }
 
-float readPh() {
-  int raw = analogRead(POT_PH);               // 0–4095
-  return 4.0 + (raw / 4095.0) * 5.0;         // 4.0–9.0
-}
-
-// ── POST to backend ──────────────────────────────────────────────────────────
-bool postReading(float temp, float hum, float moisture, float ph) {
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("[POST] WiFi not connected, skipping");
-    return false;
-  }
-
+// ── LoRa Transmission ────────────────────────────────────────────────────────
+bool transmitReading(float temp, float hum, float moisture) {
   StaticJsonDocument<256> doc;
   doc["farm"]        = FARM_ID;
   doc["deviceId"]    = DEVICE_ID;
   doc["temperature"] = temp;
   doc["humidity"]    = hum;
   doc["moisture"]    = moisture;
-  doc["ph"]          = ph;
-  doc["rainfall"]    = 0;        // no rain sensor in simulation
-  doc["source"]      = "iot";
+  doc["ph"]          = 6.5;      // Hardcoded default (pH sensor removed)
+  doc["rainfall"]    = 0;        // no rain sensor
+  doc["source"]      = "iot-lora";
 
   char body[256];
   serializeJson(doc, body);
 
-  HTTPClient http;
-  http.begin(SERVER_URL);
-  http.addHeader("Content-Type", "application/json");
-  http.addHeader("x-api-key", API_KEY);
-  http.addHeader("bypass-tunnel-reminder", "true");
-  http.setTimeout(8000);
+  Serial.printf("[LoRa] Transmitting: %s\n", body);
 
-  int code = http.POST(body);
-  Serial.printf("[POST] %s → HTTP %d\n", SERVER_URL, code);
+  LoRa.beginPacket();
+  LoRa.print(body);
+  int status = LoRa.endPacket();
 
-  if (code > 0) {
-    Serial.printf("[POST] Response: %s\n", http.getString().c_str());
+  if (status) {
+    Serial.println("[LoRa] Packet sent successfully.");
+    return true;
   } else {
-    Serial.printf("[POST] Error: %s\n", http.errorToString(code).c_str());
+    Serial.println("[LoRa] Packet transmission failed.");
+    return false;
   }
-
-  http.end();
-  return (code == 200 || code == 201);
 }
 
 // ── Setup ─────────────────────────────────────────────────────────────────────
@@ -151,15 +113,16 @@ void setup() {
   Serial.begin(115200);
   delay(500);
 
-  pinMode(LED_GREEN,  OUTPUT);
-  pinMode(LED_YELLOW, OUTPUT);
-  pinMode(LED_RED,    OUTPUT);
-  setLed(false, false, false);
-
   dht.setup(DHT_PIN, DHTesp::DHT22);
   Serial.println("[DHT] DHT22 initialised");
 
-  connectWiFi();
+  // Initialize LoRa
+  LoRa.setPins(ss, rst, dio0);
+  if (!LoRa.begin(BAND)) {
+    Serial.println("[LoRa] Initialization failed! Check your wiring.");
+    while (1); // Halt execution if LoRa module is not found
+  }
+  Serial.println("[LoRa] Initialized successfully.");
 }
 
 // ── Loop ──────────────────────────────────────────────────────────────────────
@@ -177,15 +140,14 @@ void loop() {
   // Validate DHT reading
   if (isnan(temp) || isnan(hum)) {
     Serial.println("[DHT] NaN reading — sensor disconnected or not ready");
-    setLed(false, false, true);
     return;
   }
 
+  // Read Soil Moisture
   float moisture = readMoisture();
-  float ph       = readPh();
 
-  Serial.printf("[Sensors] Temp=%.1f°C  Hum=%.1f%%  Moisture=%.1f%%  pH=%.2f\n",
-                temp, hum, moisture, ph);
+  Serial.printf("[Sensors] Temp=%.1f°C  Hum=%.1f%%  Moisture=%.1f%%\n",
+                temp, hum, moisture);
 
   // Outlier detection
   int histLen = historyFull ? 10 : historyIndex;
@@ -195,7 +157,6 @@ void loop() {
   if (tempOutlier || humOutlier) {
     Serial.println("[Outlier] Anomaly detected — switching to burst mode (10s)");
     postInterval = BURST_INTERVAL;
-    setLed(false, true, false);
   } else {
     postInterval = NORMAL_INTERVAL;
   }
@@ -206,12 +167,6 @@ void loop() {
   historyIndex = (historyIndex + 1) % 10;
   if (historyIndex == 0) historyFull = true;
 
-  // POST to backend
-  bool ok = postReading(temp, hum, moisture, ph);
-
-  if (ok) {
-    setLed(true, false, false);   // green = success
-  } else {
-    setLed(false, false, true);   // red = failed
-  }
+  // Transmit via LoRa
+  transmitReading(temp, hum, moisture);
 }
