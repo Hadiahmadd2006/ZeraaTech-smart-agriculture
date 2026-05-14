@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { fetchUnreadAlerts, markAlertsAsRead } from "../api";
-import { io } from "socket.io-client";
+import { useSocket } from "../context/SocketContext";
 
 export default function NotificationBell({ lang = "en" }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [alerts, setAlerts] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const { socket } = useSocket() || {};
 
   const loadAlerts = async () => {
     const data = await fetchUnreadAlerts();
@@ -16,17 +17,13 @@ export default function NotificationBell({ lang = "en" }) {
 
   useEffect(() => {
     loadAlerts();
+    if (!socket) return;
 
-    const socket = io("http://localhost:4000", { withCredentials: true });
-    socket.on("new-sensor-reading", () => {
-      // Just reload the alerts whenever a new reading arrives
-      // The backend alertEngine will have already created the alert if there was a breach
-      // We can add a slight delay to ensure DB write finishes for alerts
-      setTimeout(loadAlerts, 500);
-    });
+    const onReading = () => setTimeout(loadAlerts, 500);
+    socket.on("new-sensor-reading", onReading);
 
-    return () => socket.disconnect();
-  }, []);
+    return () => socket.off("new-sensor-reading", onReading);
+  }, [socket]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {

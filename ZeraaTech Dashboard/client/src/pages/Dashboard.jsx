@@ -8,7 +8,7 @@ import TrendChart from "../components/TrendChart";
 import SensorHistoryChart from "../components/SensorHistoryChart";
 import NotificationBell from "../components/NotificationBell";
 import TreatmentAdvisorCard from "../components/TreatmentAdvisorCard";
-import { io } from "socket.io-client";
+import { useSocket } from "../context/SocketContext";
 
 const GAUGE_LABELS = {
   en: { health: "Health", water: "Water", soil: "Soil" },
@@ -311,29 +311,27 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const { socket } = useSocket() || {};
   useEffect(() => {
-    if (!selectedFarm) return;
+    if (!selectedFarm || !socket) return;
 
-    // WebSocket real-time updates
-    const socket = io("http://localhost:4000", { withCredentials: true });
-    socket.on("new-sensor-reading", (data) => {
+    const onReading = (data) => {
       if (data.farm === selectedFarm) {
-        // Trigger a silent reload immediately
         load(selectedFarm, true);
       }
-    });
+    };
+    socket.on("new-sensor-reading", onReading);
 
-    // Fallback polling
     const interval = setInterval(() => {
       load(selectedFarm, true);
     }, 10000);
 
     return () => {
       clearInterval(interval);
-      socket.disconnect();
+      socket.off("new-sensor-reading", onReading);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedFarm]);
+  }, [selectedFarm, socket]);
 
   const handleLogout = async () => {
     try {

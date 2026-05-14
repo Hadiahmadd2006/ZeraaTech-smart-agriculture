@@ -55,6 +55,8 @@ const io = new Server(httpServer, {
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   },
+  pingInterval: 25000,
+  pingTimeout: 60000,
 });
 
 app.set("io", io);

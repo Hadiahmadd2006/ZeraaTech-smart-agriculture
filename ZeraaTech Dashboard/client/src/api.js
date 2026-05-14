@@ -246,6 +246,19 @@ export async function fetchScanResults() {
   }
 }
 
+export async function clearScanResults() {
+  try {
+    const res = await fetch(`${API_BASE}/api/scan-results`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    return await safeJson(res, "Failed to clear scan history");
+  } catch (err) {
+    console.warn("Could not clear scan history:", err.message);
+    return { deleted: 0 };
+  }
+}
+
 export async function updateSetting(key, value) {
   try {
     const res = await fetch(`${API_BASE}/api/settings/${encodeURIComponent(key)}`, {

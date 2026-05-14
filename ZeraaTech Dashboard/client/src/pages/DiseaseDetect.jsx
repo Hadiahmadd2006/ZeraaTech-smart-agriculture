@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { detectDisease, saveScanResult, fetchScanResults } from "../api";
+import { detectDisease, saveScanResult, fetchScanResults, clearScanResults } from "../api";
 import { syncDocumentLanguage } from "../i18n";
 
 const ADMIN_EMAIL = "ghareeb.hadi1@gmail.com";
@@ -56,7 +56,8 @@ const T = {
 };
 
 function formatLabel(label) {
-  return label.replace(/___/g, " — ").replace(/_/g, " ");
+  if (!label) return "";
+  return String(label).replace(/___/g, " — ").replace(/_/g, " ");
 }
 
 function isHealthy(label) {
@@ -316,12 +317,12 @@ export default function DiseaseDetect() {
                         {isHealthy(item.label) ? t("healthy") : t("diseased")}
                       </span>
                     </span>
-                    <span style={{ fontWeight: 600 }}>{(item.confidence * 100).toFixed(1)}%</span>
+                    <span style={{ fontWeight: 600 }}>{typeof item.confidence === "number" ? `${(item.confidence * 100).toFixed(1)}%` : "—"}</span>
                   </div>
                   <div style={{ height: 8, background: "var(--line)", borderRadius: 99, overflow: "hidden" }}>
                     <div style={{
                       height: "100%",
-                      width: `${(item.confidence * 100).toFixed(1)}%`,
+                      width: `${typeof item.confidence === "number" ? (item.confidence * 100).toFixed(1) : 0}%`,
                       background: i === 0 ? "var(--accent)" : "var(--line)",
                       borderRadius: 99,
                       transition: "width 0.6s ease",
@@ -354,7 +355,7 @@ export default function DiseaseDetect() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <h3 style={{ margin: 0 }}>{t("history")}</h3>
             {history.length > 0 && (
-              <button className="logout-btn" onClick={() => setHistory([])} style={{ padding: "4px 12px", fontSize: 12 }}>
+              <button className="logout-btn" onClick={async () => { await clearScanResults(); setHistory([]); }} style={{ padding: "4px 12px", fontSize: 12 }}>
                 {t("clearHistory")}
               </button>
             )}
@@ -371,7 +372,7 @@ export default function DiseaseDetect() {
                       {formatLabel(h.label)}
                     </div>
                     <div className="muted" style={{ fontSize: 12 }}>
-                      {(h.confidence * 100).toFixed(1)}% · {h.ts.toLocaleTimeString()}
+                      {typeof h.confidence === "number" ? `${(h.confidence * 100).toFixed(1)}%` : "—"} · {h.ts.toLocaleTimeString()}
                     </div>
                   </div>
                   <span className={isHealthy(h.label) ? "tag tag-green" : "tag tag-red"} style={{ flexShrink: 0 }}>
