@@ -6,7 +6,7 @@ import { attachAppUser, requireAuth } from "../middleware/auth.js";
 const router = Router();
 router.use(requireAuth, attachAppUser);
 
-const FLASK_URL = process.env.ML_SERVICE_URL || "http://localhost:4040";
+const FLASK_URL = process.env.ML_SERVICE_URL || "http://127.0.0.1:2006";
 const FLASK_TIMEOUT_MS = 4000;
 
 // Simple in-memory cache: { key -> { data, expiresAt } }

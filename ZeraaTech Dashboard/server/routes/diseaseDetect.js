@@ -1,7 +1,7 @@
 import express from "express";
 
 const router = express.Router();
-const FLASK_URL = process.env.ML_SERVICE_URL || "http://localhost:5173";
+const FLASK_URL = process.env.ML_SERVICE_URL || "http://127.0.0.1:2006";
 
 const mockResponse = () => ({
   label: "Strawberry___healthy",
