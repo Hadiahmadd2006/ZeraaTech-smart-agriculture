@@ -12,10 +12,20 @@ const STATUS_TEXT = {
 const STATUS_COLOR = { good: "#22c55e", dry: "#ef4444", wet: "#0ea5e9" };
 
 const CROP_NAMES = {
-  Tomato: { en: "Tomato", ar: "طماطم" },
-  Potato: { en: "Potato", ar: "بطاطس" },
+  Apple: { en: "Apple", ar: "تفاح" },
+  Blueberry: { en: "Blueberry", ar: "توت أزرق" },
+  Cherry: { en: "Cherry", ar: "كرز" },
+  Corn: { en: "Corn", ar: "ذرة" },
+  Grape: { en: "Grape", ar: "عنب" },
+  Orange: { en: "Orange", ar: "برتقال" },
+  Peach: { en: "Peach", ar: "خوخ" },
   Pepper: { en: "Pepper", ar: "فلفل" },
-  Wheat: { en: "Wheat", ar: "قمح" },
+  Potato: { en: "Potato", ar: "بطاطس" },
+  Raspberry: { en: "Raspberry", ar: "توت العليق" },
+  Soybean: { en: "Soybean", ar: "فول الصويا" },
+  Squash: { en: "Squash", ar: "كوسا" },
+  Strawberry: { en: "Strawberry", ar: "فراولة" },
+  Tomato: { en: "Tomato", ar: "طماطم" },
 };
 
 const ADMIN_EMAIL = "ghareeb.hadi1@gmail.com";
@@ -251,10 +261,9 @@ export default function Farms() {
                     value={newFarm.crop}
                     onChange={(e) => setNewFarm((p) => ({ ...p, crop: e.target.value }))}
                   >
-                    <option value="Tomato">Tomato</option>
-                    <option value="Potato">Potato</option>
-                    <option value="Pepper">Pepper</option>
-                    <option value="Wheat">Wheat</option>
+                    {Object.keys(CROP_NAMES).map((k) => (
+                      <option key={k} value={k}>{CROP_NAMES[k][lang] || CROP_NAMES[k].en}</option>
+                    ))}
                   </select>
                 </div>
                 <div style={{ flex: 1 }}>
